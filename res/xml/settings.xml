@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<PreferenceCategory android:title="@string/appearance">
+		<reo7sp.cleverday.ui.preference.TimePreference
+				android:defaultValue="9:00"
+				android:key="pref_day_start"
+				android:summary="@string/time_line_scroll_start"
+				android:title="@string/day_start" />
+
+		<CheckBoxPreference
+				android:title="@string/show_notification"
+				android:key="pref_show_notification"
+				android:defaultValue="true"
+				android:summaryOn="@string/show_notification_on_summary"
+				android:summaryOff="@string/show_notification_off_summary" />
+
+		<CheckBoxPreference
+				android:title="@string/dark_theme"
+				android:key="pref_dark_theme"
+				android:summaryOn="@string/ui_is_dark"
+				android:summaryOff="@string/ui_is_light" />
+	</PreferenceCategory>
+
+	<PreferenceCategory android:title="@string/sync">
+		<CheckBoxPreference
+				android:key="pref_use_mobile_network"
+				android:summaryOn="@string/use_mobile_network_and_wifi"
+				android:summaryOff="@string/use_only_wifi"
+				android:title="@string/use_mobile_network" />
+	</PreferenceCategory>
+
+	<PreferenceCategory android:title="@string/google_calendar">
+		<ListPreference
+				android:defaultValue="none"
+				android:entries="@array/none"
+				android:entryValues="@array/none"
+				android:key="pref_google_calendar"
+				android:summary="@string/none"
+				android:title="@string/google_calendar" />
+
+		<CheckBoxPreference
+				android:key="pref_modify_google"
+				android:summaryOn="@string/modify_google_on_summary"
+				android:summaryOff="@string/modify_google_off_summary"
+				android:title="@string/modify_google" />
+
+		<CheckBoxPreference
+				android:key="pref_receive_from_google"
+				android:summaryOn="@string/receive_from_google_on_summary"
+				android:summaryOff="@string/receive_from_google_off_summary"
+				android:title="@string/receive_from_google" />
+
+		<CheckBoxPreference
+				android:defaultValue="true"
+				android:key="pref_google_event_color"
+				android:summaryOn="@string/calendar_event_color_on_summary"
+				android:summaryOff="@string/calendar_event_color_off_summary"
+				android:title="@string/event_color" />
+	</PreferenceCategory>
+
+	<PreferenceCategory android:title="@string/info">
+		<PreferenceScreen
+				android:key="pref_about"
+				android:title="@string/about">
+
+			<intent
+					android:action="android.intent.action.VIEW"
+					android:targetClass="reo7sp.cleverday.ui.activity.AboutActivity"
+					android:targetPackage="reo7sp.cleverday" />
+
+		</PreferenceScreen>
+
+		<PreferenceScreen android:title="@string/contacts">
+			<PreferenceScreen
+					android:title="@string/site"
+					android:key="pref_site_link"
+					android:summary="http://www.example.com">
+
+				<intent
+						android:action="android.intent.action.VIEW"
+						android:data="http://www.example.com"
+						/>
+
+			</PreferenceScreen>
+
+			<PreferenceScreen
+					android:title="@string/rate_app"
+					android:key="pref_market_link"
+					android:summary="@string/on_google_play">
+
+				<intent
+						android:action="android.intent.action.VIEW"
+						android:data="http://www.example.com"
+						/>
+
+			</PreferenceScreen>
+
+			<PreferenceScreen
+					android:title="@string/submit_help"
+					android:key="pref_submit_help_link"
+					android:summary="http://www.example.com">
+
+				<intent
+						android:action="android.intent.action.VIEW"
+						android:data="http://www.example.com"
+						/>
+
+			</PreferenceScreen>
+		</PreferenceScreen>
+
+		<PreferenceScreen android:title="@string/licenses">
+			<PreferenceScreen
+					android:title="UndoBarController"
+					android:key="pref_undobarcontroller_link"
+					android:summary="https://code.google.com/p/romannurik-code/source/browse/misc/undobar/">
+
+				<intent
+						android:action="android.intent.action.VIEW"
+						android:data="https://code.google.com/p/romannurik-code/source/browse/misc/undobar/"
+						/>
+
+			</PreferenceScreen>
+		</PreferenceScreen>
+
+		<PreferenceScreen android:title="@string/translators">
+			<Preference
+					android:title="Konstantin Morozenkov"
+					android:summary="German" />
+
+			<Preference
+					android:title="Konstantin Morozenkov"
+					android:summary="Czech" />
+		</PreferenceScreen>
+	</PreferenceCategory>
+
+</PreferenceScreen>

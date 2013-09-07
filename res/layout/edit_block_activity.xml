@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/edit_activity_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin">
+
+	<reo7sp.cleverday.ui.view.CleanableAutoCompleteTextView
+			android:id="@+id/title_edit"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:ems="10"
+			android:hint="@string/title">
+
+		<requestFocus />
+	</reo7sp.cleverday.ui.view.CleanableAutoCompleteTextView>
+
+	<TextView
+			android:id="@+id/note_edit"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentRight="true"
+			android:layout_below="@+id/end_date_button"
+			android:layout_marginTop="32dp"
+			android:ems="10"
+			android:gravity="top"
+			android:hint="@string/notes"
+			android:padding="16dp"
+			android:background="@drawable/textarea_border"
+			android:layout_above="@+id/control_buttons"
+			android:textSize="18sp" />
+
+	<Button
+			android:id="@+id/start_time_button"
+			style="?android:attr/spinnerStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBaseline="@+id/start_date_button"
+			android:layout_alignBottom="@+id/start_date_button"
+			android:layout_alignLeft="@+id/end_time_button"
+			android:paddingLeft="10dp"
+			android:textSize="18sp"
+			android:width="96dp" />
+
+	<Button
+			android:id="@+id/end_time_button"
+			style="?android:attr/spinnerStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignRight="@+id/note_edit"
+			android:layout_below="@+id/end_time_label"
+			android:paddingLeft="10dp"
+			android:textSize="18sp"
+			android:width="96dp" />
+
+	<Button
+			android:id="@+id/end_date_button"
+			style="?android:attr/spinnerStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBaseline="@+id/end_time_button"
+			android:layout_alignBottom="@+id/end_time_button"
+			android:layout_alignLeft="@+id/end_time_label"
+			android:layout_alignRight="@+id/start_date_button"
+			android:paddingLeft="10dp"
+			android:textSize="18sp" />
+
+	<Button
+			android:id="@+id/start_date_button"
+			style="?android:attr/spinnerStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignLeft="@+id/start_time_label"
+			android:layout_below="@+id/start_time_label"
+			android:layout_toLeftOf="@+id/start_time_button"
+			android:paddingLeft="10dp"
+			android:textSize="18sp" />
+
+	<TextView
+			android:id="@+id/end_time_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignLeft="@+id/start_date_button"
+			android:layout_below="@+id/start_date_button"
+			android:layout_marginTop="23dp"
+			android:paddingLeft="8dp"
+			android:text="@string/end"
+			android:textColor="@android:color/darker_gray"
+			android:textSize="18sp" />
+
+	<TextView
+			android:id="@+id/start_time_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignLeft="@+id/title_edit"
+			android:layout_below="@+id/title_edit"
+			android:layout_marginTop="42dp"
+			android:paddingLeft="8dp"
+			android:text="@string/start"
+			android:textColor="@android:color/darker_gray"
+			android:textSize="18sp" />
+
+	<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:id="@+id/control_buttons"
+			android:paddingTop="16dp"
+			android:paddingBottom="8dp"
+			android:measureWithLargestChild="false"
+			android:orientation="horizontal">
+
+		<Button
+				android:layout_width="wrap_content"
+				android:layout_height="32dp"
+				android:text="@string/cancel"
+				android:id="@+id/cancel_button"
+				android:background="@android:color/transparent"
+				android:layout_weight="1" />
+
+		<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="@drawable/divider" />
+
+		<Button
+				android:layout_width="wrap_content"
+				android:layout_height="32dp"
+				android:text="@string/save"
+				android:id="@+id/save_button"
+				android:background="@android:color/transparent"
+				android:layout_weight="1" />
+	</LinearLayout>
+
+</RelativeLayout>

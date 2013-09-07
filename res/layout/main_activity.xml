@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+	<android.support.v4.view.ViewPager
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/time_line_pager"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content" />
+
+	<LinearLayout
+			android:id="@+id/popupbar"
+			style="@style/MyStyle.PopupBar"
+			android:visibility="gone">
+
+		<Button
+				android:id="@+id/popupbar_button_1"
+				style="@style/MyStyle.PopupBarButton" />
+
+		<TextView
+				android:id="@+id/popupbar_message"
+				style="@style/MyStyle.PopupBarMessage" />
+
+		<Button
+				android:id="@+id/popupbar_button_2"
+				style="@style/MyStyle.PopupBarButton" />
+	</LinearLayout>
+
+</merge>

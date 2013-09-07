@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<item
+			android:id="@+id/action_main_menu_add"
+			android:icon="@drawable/ic_new_light"
+			android:showAsAction="ifRoom"
+			android:title="@string/add" />
+
+	<item
+			android:id="@+id/action_main_menu_send_log"
+			android:showAsAction="never"
+			android:title="Send log" />
+
+	<item
+			android:id="@+id/action_main_menu_settings"
+			android:title="@string/settings" />
+
+</menu>
