@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
 
+<resources>
 	<string name="untitled_block">Безымянный блок</string>
 	<string name="today">cегодня</string>
 	<string name="appearance">Вид</string>
@@ -75,5 +75,12 @@
 	<string name="rate_app">Оценить приложение</string>
 	<string name="submit_help">Отправить баг-репорт/функцию/перевод</string>
 	<string name="on_google_play">На Google Play</string>
-
+	<string name="welcome">Добро пожаловать</string>
+	<string name="hello">Привет!</string>
+	<string name="hello_text">Привет! Это CleverDay - временной органайзер, позволяющий быстро и удобно планировать ваш день</string>
+	<string name="ok">OK</string>
+	<string name="plan_fast">Планируй быстро</string>
+	<string name="plan_fast_text">Есть ежедневная рутина? Добавь эти блоки в новые дни одним нажатием!</string>
+	<string name="edit_fast">Редактируй быстро</string>
+	<string name="edit_fast_text">Планы неожиданно изменились? Просто передвинь следующие блоки одним жестом!</string>
 </resources>

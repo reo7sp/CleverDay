@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.data.TimeBlock;
+import reo7sp.cleverday.ui.activity.MainActivity;
 import reo7sp.cleverday.ui.preference.TimePreference;
 import reo7sp.cleverday.ui.view.TimeBlockView;
 import reo7sp.cleverday.ui.view.TimeLineView;
@@ -89,7 +90,7 @@ public class TimeLinesLeader {
 	 */
 	public void addSlave(TimeLineView slave) {
 		slaves.add(slave);
-		if (slaves.size() > TimeLinePagerAdapter.COUNT) {
+		if (slaves.size() > MainActivity.TIMELINES_COUNT) {
 			filterSlaves();
 		}
 	}

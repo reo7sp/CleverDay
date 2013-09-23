@@ -3,13 +3,19 @@ package reo7sp.cleverday.ui.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+
+import java.util.Date;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
@@ -17,7 +23,6 @@ import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.DataCenter;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.log.Log;
-import reo7sp.cleverday.ui.TimeLinePagerAdapter;
 import reo7sp.cleverday.ui.preference.TimePreference;
 import reo7sp.cleverday.ui.view.TimeBlockView;
 import reo7sp.cleverday.ui.view.TimeLineView;
@@ -26,8 +31,9 @@ import reo7sp.cleverday.utils.DateUtils;
 import reo7sp.cleverday.utils.StringUtils;
 
 public class MainActivity extends FragmentActivity {
+	public static final int TIMELINES_COUNT = 5;
 	private static boolean firstCreation = true;
-	private static int viewPagerPos = TimeLinePagerAdapter.COUNT / 2;
+	private static int viewPagerPos = TIMELINES_COUNT / 2;
 	private ViewPager viewPager;
 	private TimeLineView currentTimeLine;
 
@@ -42,6 +48,11 @@ public class MainActivity extends FragmentActivity {
 		AndroidUtils.updateTheme(this);
 		super.onCreate(savedInstanceState);
 		getActionBar().setLogo(android.R.color.transparent);
+
+		// welcome
+		if (!AndroidUtils.isWelcomeScreenCompleted()) {
+			startActivity(new Intent(this, WelcomeActivity.class));
+		}
 
 		// content
 		setContentView(R.layout.main_activity);
@@ -145,5 +156,53 @@ public class MainActivity extends FragmentActivity {
 
 	public TimeLineView getCurrentTimeLine() {
 		return currentTimeLine;
+	}
+
+	private class TimeLinePagerAdapter extends FragmentStatePagerAdapter {
+		public TimeLinePagerAdapter() {
+			super(getSupportFragmentManager());
+		}
+
+		@Override
+		public Fragment getItem(int i) {
+			Fragment fragment = new TimeLineFragment();
+			Bundle args = new Bundle();
+			args.putLong("time", Core.getCreationTime() + TimeConstants.DAY * (i - getCount() / 2));
+			args.putInt("pos", i);
+			fragment.setArguments(args);
+			return fragment;
+		}
+
+		@Override
+		public int getCount() {
+			return TIMELINES_COUNT;
+		}
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			Date date = new Date(Core.getCreationTime() + TimeConstants.DAY * (position - getCount() / 2));
+			switch (position) {
+				case TIMELINES_COUNT / 2 - 1: // yesterday
+					return Core.getContext().getResources().getString(R.string.yesterday) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+
+				case TIMELINES_COUNT / 2: // today
+					return Core.getContext().getResources().getString(R.string.today) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+
+				case TIMELINES_COUNT / 2 + 1: // tomorrow
+					return Core.getContext().getResources().getString(R.string.tomorrow) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+
+				default:
+					return DateUtils.FORMAT_WEEKDAY_DAY_MONTH.format(date);
+			}
+		}
+	}
+
+	private class TimeLineFragment extends Fragment {
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			TimeLineView timeLine = new TimeLineView(getActivity(), getArguments().getLong("time"));
+			timeLine.setTag("tl_" + getArguments().getInt("pos"));
+			return timeLine;
+		}
 	}
 }
