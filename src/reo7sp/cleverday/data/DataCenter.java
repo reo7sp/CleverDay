@@ -139,6 +139,9 @@ public class DataCenter {
 
 								Collections.sort(timeBlocks, timeBlockComparator);
 
+								NotificationService.invalidate();
+								StandardWidget.invalidate();
+
 								for (TimeBlock block : timeBlocks) {
 									block.setSaved();
 								}
@@ -196,8 +199,6 @@ public class DataCenter {
 	 */
 	void invalidate() {
 		invalidated = true;
-		NotificationService.invalidate();
-		StandardWidget.invalidate();
 	}
 
 	/**
