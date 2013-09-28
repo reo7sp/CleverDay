@@ -84,10 +84,6 @@ public class Log {
 	}
 
 	public static void err(String tag, String message, Throwable throwable) {
-		err(tag, message, throwable, false);
-	}
-
-	public static void err(String tag, String message, Throwable throwable, boolean onlyToFile) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(message).append("\n");
 		builder.append("    ").append(throwable).append("\n");
@@ -104,6 +100,7 @@ public class Log {
 	}
 
 	public synchronized void writeToLog(String tag, String message, LogLevel level) {
+		tag = "CleverDay-" + tag;
 		android.util.Log.println(level.getValue(), tag, message);
 		if (fileLogger != null) {
 			fileLogger.log(tag, message, level);

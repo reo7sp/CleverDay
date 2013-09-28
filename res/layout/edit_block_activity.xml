@@ -13,13 +13,21 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_alignParentLeft="true"
-			android:layout_alignParentRight="true"
 			android:layout_alignParentTop="true"
+			android:layout_toRightOf="@+id/history_button"
 			android:ems="10"
-			android:hint="@string/title">
+			android:hint="@string/title" android:layout_toLeftOf="@+id/history_button" />
 
-		<requestFocus />
-	</reo7sp.cleverday.ui.view.CleanableAutoCompleteTextView>
+	<ImageButton
+			android:id="@+id/history_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/ic_overflow_gray"
+			android:background="@android:color/transparent"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="4dp"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true" />
 
 	<TextView
 			android:id="@+id/note_edit"

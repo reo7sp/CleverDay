@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="reo7sp.cleverday"
-          android:versionCode="4"
-          android:versionName="0.3.1">
+          android:versionCode="0"
+          android:versionName="0.3.1+">
 
 	<uses-sdk
 			android:minSdkVersion="14"
@@ -54,12 +54,17 @@
 				android:label="@string/edit_notes" />
 
 		<activity
-				android:name="reo7sp.cleverday.ui.activity.PostponeActivity"
+				android:name=".ui.activity.HistoryViewActivity"
 				android:label="@string/postpone" />
 
 		<activity
 				android:name="reo7sp.cleverday.ui.activity.WelcomeActivity"
 				android:label="@string/welcome" />
+
+		<activity
+				android:name="reo7sp.cleverday.ui.activity.HistoryViewActivity"
+				android:label="@string/history" />
+
 
 		<!-- Services -->
 

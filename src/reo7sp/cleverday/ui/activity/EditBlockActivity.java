@@ -12,9 +12,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
@@ -40,18 +44,19 @@ public class EditBlockActivity extends Activity {
 		public void afterTextChanged(Editable s) {
 		}
 	};
+	private final Map<Integer, TimeBlock> history = new HashMap<Integer, TimeBlock>();
 	private TimeBlock block;
 	private TimeBlock backup;
-	private ArrayAdapter<String> completionsAdapter;
 	private boolean create;
 	private AutoCompleteTextView titleEdit;
 	private TextView notesEdit;
-	private TextView startTimeButton;
-	private TextView startDateButton;
-	private TextView endTimeButton;
-	private TextView endDateButton;
-	private TextView cancelButton;
-	private TextView saveButton;
+	private Button startTimeButton;
+	private Button startDateButton;
+	private Button endTimeButton;
+	private Button endDateButton;
+	private ImageButton historyButton;
+	private Button cancelButton;
+	private Button saveButton;
 
 	public static void showAdd(TimeBlock block) {
 		Intent intent = new Intent(Core.getContext(), EditBlockActivity.class);
@@ -103,40 +108,48 @@ public class EditBlockActivity extends Activity {
 		// finding views
 		titleEdit = (AutoCompleteTextView) findViewById(R.id.title_edit);
 		notesEdit = (TextView) findViewById(R.id.note_edit);
-		startTimeButton = (TextView) findViewById(R.id.start_time_button);
-		startDateButton = (TextView) findViewById(R.id.start_date_button);
-		endTimeButton = (TextView) findViewById(R.id.end_time_button);
-		endDateButton = (TextView) findViewById(R.id.end_date_button);
-		cancelButton = (TextView) findViewById(R.id.cancel_button);
-		saveButton = (TextView) findViewById(R.id.save_button);
+		startTimeButton = (Button) findViewById(R.id.start_time_button);
+		startDateButton = (Button) findViewById(R.id.start_date_button);
+		endTimeButton = (Button) findViewById(R.id.end_time_button);
+		endDateButton = (Button) findViewById(R.id.end_date_button);
+		historyButton = (ImageButton) findViewById(R.id.history_button);
+		cancelButton = (Button) findViewById(R.id.cancel_button);
+		saveButton = (Button) findViewById(R.id.save_button);
 
-		// setting completions
-		String[] completions = new String[HistoryStorage.getHistory().size()];
+		// fetching completions
 		int i = 0;
 		for (TimeBlock block : HistoryStorage.getHistory()) {
-			completions[i++] = block.getTitle();
+			history.put(i++, block);
 		}
-		completionsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, completions);
-		titleEdit.setAdapter(completionsAdapter);
+
+		// filling adapter
+		String[] historyStrings = new String[history.size()];
+		for (i = 0; i < history.size(); i++) {
+			historyStrings[i] = history.get(i).toString();
+		}
+		ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, historyStrings);
+		titleEdit.setAdapter(adapter);
 
 		// setting listeners
 		titleEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> list, View v, int pos, long id) {
-				TimeBlock block = HistoryStorage.getFromHistory(completionsAdapter.getItem(pos));
-				if (block != null) {
-					EditBlockActivity.this.block.setTitle(block.getTitle());
-					EditBlockActivity.this.block.setNotes(block.getNotes());
-					EditBlockActivity.this.block.setColor(block.getColor());
-					EditBlockActivity.this.block.setReminder(block.hasReminder());
-
-					long dayStart = DateUtils.trimToDay(System.currentTimeMillis());
-					long start = dayStart + block.getStart() - DateUtils.trimToDay(block.getStart());
-					long end = dayStart + block.getEnd() - DateUtils.trimToDay(block.getEnd());
-					EditBlockActivity.this.block.setBounds(start, end, false);
-
-					updateData();
+			public void onItemClick(AdapterView<?> list, View view, int pos, long id) {
+				TimeBlock historyBlock = HistoryStorage.getFromHistory(history.get(pos).getTitle());
+				if (historyBlock == null) {
+					return;
 				}
+
+				block.setTitle(historyBlock.getTitle());
+				block.setNotes(historyBlock.getNotes());
+				block.setColor(historyBlock.getColor());
+				block.setReminder(historyBlock.hasReminder());
+
+				long dayStart = DateUtils.trimToDay(System.currentTimeMillis());
+				long start = dayStart + historyBlock.getStart() - DateUtils.trimToDay(historyBlock.getStart());
+				long end = dayStart + historyBlock.getEnd() - DateUtils.trimToDay(historyBlock.getEnd());
+				block.setBounds(start, end, false);
+
+				updateData();
 			}
 		});
 		titleEdit.addTextChangedListener(titleTextWatcher);
@@ -170,6 +183,14 @@ public class EditBlockActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Dialogs.createBlockDatePickerDialog(EditBlockActivity.this, block).show();
+			}
+		});
+		historyButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(EditBlockActivity.this, HistoryViewActivity.class);
+				intent.putExtra("id", block.getID());
+				startActivity(intent);
 			}
 		});
 		cancelButton.setOnClickListener(new View.OnClickListener() {

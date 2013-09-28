@@ -44,9 +44,9 @@ public class TimeLineView extends View {
 	private final GestureListener gestureListener = new MyGestureListener();
 	private final List<TimeBlockView> timeBlockViews = new TimeBlockViewsCollection();
 	private final List<TimeBlockView> immutableTimeBlockViews = Collections.unmodifiableList(timeBlockViews);
+	private final boolean initialized;
 	private long time;
 	private ScrollAssistant scrollAssistant;
-	private final boolean initialized;
 
 	public TimeLineView(Context context, long time) {
 		super(context);

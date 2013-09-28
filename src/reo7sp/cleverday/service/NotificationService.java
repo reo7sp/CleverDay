@@ -16,8 +16,8 @@ import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
+import reo7sp.cleverday.ui.activity.HistoryViewActivity;
 import reo7sp.cleverday.ui.activity.MainActivity;
-import reo7sp.cleverday.ui.activity.PostponeActivity;
 import reo7sp.cleverday.utils.AndroidUtils;
 
 public class NotificationService extends Service {
@@ -155,7 +155,7 @@ public class NotificationService extends Service {
 						alarmNotificationBuilder.addAction(R.drawable.ic_edit_light, getResources().getString(R.string.edit), pendingEditIntent);
 
 						// postpone intent
-						Intent postponeIntent = new Intent(NotificationService.this, PostponeActivity.class);
+						Intent postponeIntent = new Intent(NotificationService.this, HistoryViewActivity.class);
 						postponeIntent.putExtra("id", current.getID());
 						PendingIntent pendingPostponeIntent = PendingIntent.getActivity(NotificationService.this, 0, postponeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 						alarmNotificationBuilder.addAction(R.drawable.ic_next_light, getResources().getString(R.string.postpone), pendingPostponeIntent);

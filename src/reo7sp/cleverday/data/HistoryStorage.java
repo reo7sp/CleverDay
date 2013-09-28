@@ -87,7 +87,11 @@ public class HistoryStorage extends DataStorage implements DataBaseConstants {
 
 	@Override
 	void syncMeWithDataCenter() {
-		super.syncMeWithDataCenter();
+		for (TimeBlock block : dataCenter.getTimeBlocks()) {
+			if (block.getModifyType() != TimeBlock.ModifyType.REMOVE && !timeBlocks.contains(block)) {
+				timeBlocks.add(block);
+			}
+		}
 		filterTimeBlocks();
 	}
 

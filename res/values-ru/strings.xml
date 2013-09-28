@@ -80,7 +80,9 @@
 	<string name="hello_text">Привет! Это CleverDay - временной органайзер, позволяющий быстро и удобно планировать ваш день</string>
 	<string name="ok">OK</string>
 	<string name="plan_fast">Планируй быстро</string>
-	<string name="plan_fast_text">Есть ежедневная рутина? Добавь эти блоки в новые дни одним нажатием!</string>
+	<string name="plan_fast_text">Есть повторяющиеся задачи? Вы можете добавлять их в следующие дни только в двумя нажатиями</string>
 	<string name="edit_fast">Редактируй быстро</string>
-	<string name="edit_fast_text">Планы неожиданно изменились? Просто передвинь следующие блоки одним жестом!</string>
+	<string name="edit_fast_text">Планы неожиданно изменились? Просто передвинь всё остальное</string>
+	<string name="history">История</string>
+	<string name="no_history">Вы не создали пока ни одну задачу</string>
 </resources>
