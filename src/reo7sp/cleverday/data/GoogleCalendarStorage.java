@@ -66,7 +66,6 @@ public class GoogleCalendarStorage extends DataStorage {
 		instance.update();
 	}
 
-	@SuppressWarnings("SynchronizeOnNonFinalField")
 	private synchronized void update() {
 		String calendarPref = Core.getPreferences().getString("pref_google_calendar", "none");
 		if (mainCalendar == null || !calendarPref.equals("" + mainCalendar.getID())) {

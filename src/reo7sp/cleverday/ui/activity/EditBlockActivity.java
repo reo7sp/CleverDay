@@ -16,11 +16,11 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.HistoryStorage;
 import reo7sp.cleverday.data.TimeBlock;
@@ -268,9 +268,9 @@ public class EditBlockActivity extends Activity {
 		invalidateOptionsMenu();
 		titleEdit.setText(block.getTitle());
 		notesEdit.setText(block.getNotes());
-		startTimeButton.setText(DateUtils.FORMAT_HOUR_MINUTE.format(new Date(block.getStart())));
-		startDateButton.setText(DateUtils.FORMAT_WEEKDAY_DAY_MONTH_YEAR.format(new Date(block.getStart())));
-		endTimeButton.setText(DateUtils.FORMAT_HOUR_MINUTE.format(new Date(block.getEnd())));
-		endDateButton.setText(DateUtils.FORMAT_WEEKDAY_DAY_MONTH_YEAR.format(new Date(block.getEnd())));
+		startTimeButton.setText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getStart()));
+		startDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getStart()));
+		endTimeButton.setText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getEnd()));
+		endDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getEnd()));
 	}
 }

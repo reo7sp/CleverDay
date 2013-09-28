@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Collection;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.TimeBlock;
@@ -68,9 +69,9 @@ public class TimeBlockView {
 		// text
 		Core.getPaint().setColor(ColorUtils.changeAlpha(Color.WHITE, alpha));
 		canvas.drawText(block.getHumanTitle(), 130, y + 30, Core.getPaint());
-		canvas.drawText(DateUtils.FORMAT_HOUR_MINUTE.format(block.getStart()), 60, y + 30, Core.getPaint());
+		canvas.drawText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getStart()), 60, y + 30, Core.getPaint());
 		if (height > 70) {
-			canvas.drawText(DateUtils.FORMAT_HOUR_MINUTE.format(block.getEnd()), 60, y + height - 10, Core.getPaint());
+			canvas.drawText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getEnd()), 60, y + height - 10, Core.getPaint());
 		}
 
 		// notes

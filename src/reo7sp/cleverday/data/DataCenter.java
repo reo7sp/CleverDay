@@ -35,7 +35,8 @@ public class DataCenter {
 	}
 
 	/**
-	 * Singleton method. It will return null, if core isn't built
+	 * Singleton method with lazy initialization.
+	 * It'll return null if core isn't built
 	 *
 	 * @return the instance
 	 */
@@ -223,7 +224,9 @@ public class DataCenter {
 			@Override
 			public void run() {
 				synchronized (DataCenter.this) {
+					Log.i("DataCenter", "Receiving data");
 					dataStorageLeader.receive();
+					Log.i("DataCenter", "Received!");
 				}
 			}
 		});

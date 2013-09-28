@@ -4,11 +4,12 @@ import reo7sp.cleverday.log.Log;
 import reo7sp.cleverday.utils.DateUtils;
 
 public class DayChecker extends Thread {
-	static final DayChecker INSTANCE = new DayChecker();
+	static {
+		new DayChecker().start();
+	}
 
 	private DayChecker() {
 		super("DayChecker");
-		start();
 	}
 
 	@Override

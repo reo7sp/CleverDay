@@ -24,7 +24,7 @@ public class TimeLinesLeader {
 
 	/**
 	 * Singleton method with lazy initialization.
-	 * It'll return null if core isn't built ever
+	 * It'll return null if core isn't built
 	 *
 	 * @return the instance
 	 */
@@ -36,7 +36,7 @@ public class TimeLinesLeader {
 	}
 
 	/**
-	 * Sets right TimeLineView.STEP and scroll y
+	 * Sets right step and scroll y
 	 */
 	public void init() {
 		scrollY = TimePreference.getHour(Core.getPreferences().getString("pref_day_start", "9:00")) * TimeLineView.STEP - TimeLineView.STEP / 2;
@@ -53,7 +53,7 @@ public class TimeLinesLeader {
 	/**
 	 * Scrolls time lines by specified y
 	 *
-	 * @param y TimeLineView.STEP
+	 * @param y step
 	 */
 	public void scrollBy(int y) {
 		setScrollY(getScrollY() + y);
@@ -108,7 +108,7 @@ public class TimeLinesLeader {
 	 * Removes slave and if needed, destroy it
 	 *
 	 * @param slave   slave to remove
-	 * @param destroy destroy slave
+	 * @param destroy destroy slave completely
 	 */
 	public void removeSlave(TimeLineView slave, boolean destroy) {
 		if (destroy) {

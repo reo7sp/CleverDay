@@ -15,10 +15,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.log.Log;
@@ -57,7 +57,7 @@ public class TimeLineView extends View {
 		setTime(time);
 		scrollTo(0, getLeader().getScrollY());
 		initialized = true;
-		Log.i("TimeLine", "Created new time line on " + DateUtils.FORMAT_DAY_MONTH.format(new Date(time)));
+		Log.i("TimeLine", "Created new time line on " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time));
 
 		postDelayed(new Runnable() {
 			@Override

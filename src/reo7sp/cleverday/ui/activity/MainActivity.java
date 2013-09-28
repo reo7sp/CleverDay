@@ -15,9 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Date;
-
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.DataCenter;
@@ -180,19 +179,19 @@ public class MainActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Date date = new Date(Core.getCreationTime() + TimeConstants.DAY * (position - getCount() / 2));
+			long time = Core.getCreationTime() + TimeConstants.DAY * (position - getCount() / 2);
 			switch (position) {
 				case TIMELINES_COUNT / 2 - 1: // yesterday
-					return Core.getContext().getResources().getString(R.string.yesterday) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+					return Core.getContext().getResources().getString(R.string.yesterday) + ", " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time);
 
 				case TIMELINES_COUNT / 2: // today
-					return Core.getContext().getResources().getString(R.string.today) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+					return Core.getContext().getResources().getString(R.string.today) + ", " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time);
 
 				case TIMELINES_COUNT / 2 + 1: // tomorrow
-					return Core.getContext().getResources().getString(R.string.tomorrow) + ", " + DateUtils.FORMAT_DAY_MONTH.format(date);
+					return Core.getContext().getResources().getString(R.string.tomorrow) + ", " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time);
 
 				default:
-					return DateUtils.FORMAT_WEEKDAY_DAY_MONTH.format(date);
+					return Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH, time);
 			}
 		}
 	}

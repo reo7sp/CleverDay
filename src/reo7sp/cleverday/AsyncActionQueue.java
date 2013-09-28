@@ -3,11 +3,11 @@ package reo7sp.cleverday;
 import android.os.Process;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AsyncActionQueue extends ActionQueue implements Runnable {
-	private final Collection<Task> tasks = new HashSet<Task>();
+	private final Collection<Task> tasks = new CopyOnWriteArrayList<Task>();
 	private final Thread thread;
 
 	AsyncActionQueue() {
@@ -34,7 +34,7 @@ public class AsyncActionQueue extends ActionQueue implements Runnable {
 				}
 
 				// sleeping for a while
-				Thread.sleep(tasks.isEmpty() ? 500 : 10);
+				Thread.sleep(tasks.isEmpty() ? 500 : 0);
 			}
 		} catch (InterruptedException ignored) {
 		}

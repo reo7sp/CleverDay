@@ -1,8 +1,7 @@
 package reo7sp.cleverday.data;
 
-import java.util.Date;
-
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.ui.colors.SimpleColor;
@@ -57,7 +56,7 @@ public class TimeBlock implements TimeConstants {
 
 	@Override
 	public String toString() {
-		return getHumanTitle() + " (" + DateUtils.FORMAT_HOUR_MINUTE.format(new Date(getStart())) + " - " + DateUtils.FORMAT_HOUR_MINUTE.format(new Date(getEnd())) + ")";
+		return getHumanTitle() + " (" + Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, getStart()) + " - " + Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, getEnd()) + ")";
 	}
 
 	/**

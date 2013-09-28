@@ -1,43 +1,14 @@
 package reo7sp.cleverday.utils;
 
-import android.annotation.SuppressLint;
-
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.TimeConstants;
 
-@SuppressLint("SimpleDateFormat")
 public class DateUtils {
 	private DateUtils() {
 	}
-
-	/**
-	 * Time format HH:mm (10:30)
-	 */
-	public static final SimpleDateFormat FORMAT_HOUR_MINUTE = new SimpleDateFormat("HH:mm");
-
-	/**
-	 * Date format dd MMM (14 Jan)
-	 */
-	public static final SimpleDateFormat FORMAT_DAY_MONTH = new SimpleDateFormat("dd MMM");
-
-	/**
-	 * Date format E, dd MMM (Fri, 14 Jan)
-	 */
-	public static final SimpleDateFormat FORMAT_WEEKDAY_DAY_MONTH = new SimpleDateFormat("E, dd MMM");
-
-	/**
-	 * Date format E, dd MMM yyyy (Fri, 14 Jan 3001)
-	 */
-	public static final SimpleDateFormat FORMAT_WEEKDAY_DAY_MONTH_YEAR = new SimpleDateFormat("E, dd MMM yyyy");
-
-	/**
-	 * Date format dd MMM HH:mm:ss.SSS (14 Jan 10:30:11.358)
-	 */
-	public static final SimpleDateFormat FORMAT_DAY_MONTH_HOUR_MINUTE_SECOND_MILLISECOND = new SimpleDateFormat("dd MMM HH:mm:ss.SSS");
 
 	/**
 	 * Transforms UTC time to local time

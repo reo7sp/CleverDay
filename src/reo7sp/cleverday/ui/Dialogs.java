@@ -15,9 +15,9 @@ import android.widget.GridView;
 import android.widget.NumberPicker;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.TimeBlock;
@@ -114,7 +114,7 @@ public class Dialogs {
 		final NumberPicker picker = new NumberPicker(activity);
 		String[] days = new String[5];
 		for (int i = 0; i < days.length; i++) {
-			days[i] = StringUtils.makeFirstCharUpperCased(DateUtils.FORMAT_WEEKDAY_DAY_MONTH.format(new Date(Core.getCreationTime() + TimeConstants.DAY * (i - 2))));
+			days[i] = StringUtils.makeFirstCharUpperCased(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH, Core.getCreationTime() + TimeConstants.DAY * (i - 2)));
 		}
 		picker.setDisplayedValues(days);
 		picker.setMinValue(0);

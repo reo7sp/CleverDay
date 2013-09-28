@@ -1,9 +1,6 @@
 package reo7sp.cleverday;
 
 public abstract class ActionQueue {
-	ActionQueue() {
-	}
-
 	/**
 	 * Adds action to queue
 	 *
