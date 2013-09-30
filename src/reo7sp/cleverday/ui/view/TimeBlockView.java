@@ -39,6 +39,7 @@ public class TimeBlockView {
 	private PositionAnimation positionAnimation;
 	private SizeAnimation sizeAnimation;
 	private AlphaAnimation alphaAnimation;
+	private String[] notes;
 
 	TimeBlockView(TimeLineView timeLine, TimeBlock block) {
 		if (block == null) {
@@ -75,34 +76,11 @@ public class TimeBlockView {
 		}
 
 		// notes
-		String[] notes = block.getNotes() == null ? null : block.getNotes().replaceAll("\n\n+", "\n").split("\n");
 		if (notes != null) {
-			Collection<String> lines = new ArrayList<String>();
-			for (String line : notes) {
-				float width = 0;
-				StringBuilder builder = new StringBuilder();
-				String[] words = line.split(" ");
-
-				for (String word : words) {
-					word += " ";
-					width += Core.getPaint().measureText(word);
-
-					if (width > timeLine.getWidth() - 130) {
-						lines.add(builder.toString());
-						builder = new StringBuilder();
-						width = Core.getPaint().measureText(word);
-					}
-					builder.append(word);
-				}
-
-				lines.add(builder.toString());
-			}
-
-			int i = 2;
-			for (String line : lines) {
-				int lineY = 10 + 30 * i++;
+			for (int i = 0, length = notes.length; i < length; i++) {
+				int lineY = 10 + 30 * (i + 2);
 				if (height > lineY + 10) {
-					canvas.drawText(line, 130, y + lineY, Core.getPaint());
+					canvas.drawText(notes[i], 130, y + lineY, Core.getPaint());
 				}
 			}
 		}
@@ -165,6 +143,7 @@ public class TimeBlockView {
 		checkDay();
 		repairPosition(immediate);
 		repairSize(immediate);
+		updateNotes();
 	}
 
 	/**
@@ -198,7 +177,7 @@ public class TimeBlockView {
 	}
 
 	/**
-	 * Repairs y
+	 * Repairs size
 	 *
 	 * @param immediate true if animations must be prevented
 	 */
@@ -231,6 +210,37 @@ public class TimeBlockView {
 		alphaAnimation = null;
 		positionAnimation = null;
 		sizeAnimation = null;
+	}
+
+	private void updateNotes() {
+		String[] notes = block.getNotes() == null ? null : block.getNotes().replaceAll("\n\n+", "\n").split("\n");
+		if (notes != null) {
+			Collection<String> lines = new ArrayList<String>();
+			for (String line : notes) {
+				int width = 0;
+				StringBuilder builder = new StringBuilder();
+				String[] words = line.split(" ");
+
+				for (String word : words) {
+					word += " ";
+					width += Core.getPaint().measureText(word);
+
+					if (width > timeLine.getWidth() - 130) {
+						lines.add(builder.toString());
+						builder = new StringBuilder();
+						width = (int) Core.getPaint().measureText(word);
+					}
+					builder.append(word);
+				}
+
+				lines.add(builder.toString());
+			}
+
+			this.notes = new String[lines.size()];
+			lines.toArray(this.notes);
+		} else {
+			this.notes = null;
+		}
 	}
 
 	@Override
@@ -267,7 +277,7 @@ public class TimeBlockView {
 	 * @return generated height
 	 */
 	private int generateHeight() {
-		return (int) (block.getDuration() / (float) TimeConstants.HOUR * TimeLineView.STEP);
+		return (int) (block.getDuration() / TimeConstants.HOUR * TimeLineView.STEP);
 	}
 
 	/**
@@ -382,15 +392,13 @@ public class TimeBlockView {
 				}
 
 				// calculating y
-				float multiplier = (nextY - y) / 8F;
+				int multiplier = (nextY - y) / 8;
 				if (multiplier > 32) {
 					multiplier = 32;
 				} else if (multiplier < -32) {
 					multiplier = -32;
-				} else if (multiplier < 1 && multiplier > 0) {
-					multiplier = 1;
-				} else if (multiplier > -1 && multiplier < 0) {
-					multiplier = -1;
+				} else if (multiplier == 0) {
+					multiplier = nextY > y ? 1 : -1;
 				}
 				if (positionAnimation == this) {
 					y += multiplier;
@@ -408,15 +416,13 @@ public class TimeBlockView {
 		public void run() {
 			if (nextHeight != height) {
 				// calculating height
-				float multiplier = (nextHeight - height) / 8F;
+				int multiplier = (nextHeight - height) / 8;
 				if (multiplier > 32) {
 					multiplier = 32;
 				} else if (multiplier < -32) {
 					multiplier = -32;
-				} else if (multiplier < 1 && multiplier > 0) {
-					multiplier = 1;
-				} else if (multiplier > -1 && multiplier < 0) {
-					multiplier = -1;
+				} else if (multiplier == 0) {
+					multiplier = nextHeight > height ? 1 : -1;
 				}
 				if (sizeAnimation == this) {
 					height += multiplier;
@@ -456,7 +462,7 @@ public class TimeBlockView {
 						}
 					}, new PopupBar.PopupBarElement() { // button
 						@Override
-						public boolean onClick(int button) {
+						public boolean onClick() {
 							long diff = DateUtils.trimToDay(block.getStart()) - DateUtils.trimToDay(Core.getMainActivity().getCurrentTimeLine().getTime());
 							Core.getMainActivity().getViewPager().setCurrentItem(Core.getMainActivity().getViewPager().getCurrentItem() + (int) (diff / TimeConstants.DAY));
 							block.add();

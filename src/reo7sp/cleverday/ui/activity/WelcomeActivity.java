@@ -22,7 +22,7 @@ import reo7sp.cleverday.utils.AndroidUtils;
  * Created by reo7sp on 9/8/13 at 6:20 PM
  */
 public class WelcomeActivity extends FragmentActivity {
-	private static Slide[] slides = {
+	private static final Slide[] slides = {
 			new HelloSlide(),
 			new PlanFastSlide(),
 			new EditFastSlide(),

@@ -5,7 +5,7 @@ package reo7sp.cleverday.log;
  */
 public class UEHLogger implements Thread.UncaughtExceptionHandler {
 	private static UEHLogger instance;
-	private Thread.UncaughtExceptionHandler defaultUEH;
+	private final Thread.UncaughtExceptionHandler defaultUEH;
 
 	private UEHLogger() {
 		this.defaultUEH = Thread.getDefaultUncaughtExceptionHandler();

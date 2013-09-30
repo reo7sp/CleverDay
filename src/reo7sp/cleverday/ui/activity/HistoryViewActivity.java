@@ -3,14 +3,12 @@ package reo7sp.cleverday.ui.activity;
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
@@ -21,7 +19,7 @@ import reo7sp.cleverday.utils.ColorUtils;
 import reo7sp.cleverday.utils.DateUtils;
 
 public class HistoryViewActivity extends Activity {
-	private final Map<Integer, TimeBlock> history = new HashMap<Integer, TimeBlock>();
+	private final SparseArray<TimeBlock> history = new SparseArray<TimeBlock>();
 	private TimeBlock block;
 
 	@Override
@@ -57,7 +55,7 @@ public class HistoryViewActivity extends Activity {
 			history.put(i++, block);
 		}
 
-		if (history.isEmpty()) {
+		if (history.size() == 0) {
 			setContentView(R.layout.stub);
 			TextView stubText = (TextView) findViewById(R.id.stub_text);
 			stubText.setText(R.string.no_history);

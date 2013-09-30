@@ -23,8 +23,6 @@
 	<string name="notes">Заметки…</string>
 	<string name="set_time">Установить время</string>
 	<string name="set_date">Напоминание отключено</string>
-	<string name="reminder_set">Напоминание установлено</string>
-	<string name="reminder_unset">Напоминание отключено</string>
 	<string name="change_color">Изменить цвет</string>
 	<string name="reminder">Напоминание</string>
 	<string name="add">Добавить</string>
@@ -32,7 +30,6 @@
 	<string name="edit">Редактировать</string>
 	<string name="deleted">Удалено</string>
 	<string name="title">Заголовок</string>
-	<string name="sync_priority">Приоритет синхронизации</string>
 	<string name="set">Установить</string>
 	<string name="cancel">Отменить</string>
 	<string name="select_color">Выбери цвет</string>

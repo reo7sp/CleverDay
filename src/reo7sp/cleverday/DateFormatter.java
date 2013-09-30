@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public class DateFormatter {
 	private static final DateFormatter INSTANCE = new DateFormatter();
-	private Map<String, DateFormat> cache = new HashMap<String, DateFormat>();
-	private Collection<CachedResult> resultCache = new HashSet<CachedResult>();
+	private final Map<String, DateFormat> cache = new HashMap<String, DateFormat>();
+	private final Collection<CachedResult> resultCache = new HashSet<CachedResult>();
 
 	private DateFormatter() {
 	}

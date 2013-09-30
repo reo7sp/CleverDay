@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,9 +16,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
@@ -44,7 +42,7 @@ public class EditBlockActivity extends Activity {
 		public void afterTextChanged(Editable s) {
 		}
 	};
-	private final Map<Integer, TimeBlock> history = new HashMap<Integer, TimeBlock>();
+	private final SparseArray<TimeBlock> history = new SparseArray<TimeBlock>();
 	private TimeBlock block;
 	private TimeBlock backup;
 	private boolean create;

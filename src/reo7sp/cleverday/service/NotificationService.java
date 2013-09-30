@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.IBinder;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -81,7 +80,6 @@ public class NotificationService extends Service {
 		@Override
 		public void run() {
 			try {
-				Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 				while (!isInterrupted()) {
 					long now = System.currentTimeMillis();
 					TimeBlock[] firstTimeBlocks = new TimeBlock[3];

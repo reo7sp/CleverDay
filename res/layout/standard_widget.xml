@@ -8,6 +8,7 @@
                 android:id="@+id/root"
                 android:padding="8dp">
 
+	<!--suppress AndroidLintUselessParent -->
 	<LinearLayout
 			android:orientation="vertical"
 			android:layout_width="wrap_content"

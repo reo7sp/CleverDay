@@ -1,9 +1,6 @@
 package reo7sp.cleverday.ui;
 
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.data.TimeBlock;
@@ -16,7 +13,7 @@ import reo7sp.cleverday.utils.DateUtils;
 
 public class TimeLinesLeader {
 	private static TimeLinesLeader instance;
-	private final Collection<TimeLineView> slaves = new HashSet<TimeLineView>();
+	private final TimeLineView[] slaves = new TimeLineView[MainActivity.TIMELINES_COUNT];
 	private int scrollY;
 
 	private TimeLinesLeader() {
@@ -89,19 +86,13 @@ public class TimeLinesLeader {
 	 * @param slave slave to add
 	 */
 	public void addSlave(TimeLineView slave) {
-		slaves.add(slave);
-		if (slaves.size() > MainActivity.TIMELINES_COUNT) {
-			filterSlaves();
+		filterSlaves();
+		for (int i = 0, length = slaves.length; i < length; i++) {
+			if (slaves[i] == null) {
+				slaves[i] = slave;
+				break;
+			}
 		}
-	}
-
-	/**
-	 * Removes slave
-	 *
-	 * @param slave slave to remove
-	 */
-	public void removeSlave(TimeLineView slave) {
-		removeSlave(slave, false);
 	}
 
 	/**
@@ -114,7 +105,11 @@ public class TimeLinesLeader {
 		if (destroy) {
 			AndroidUtils.recycleView(slave);
 		}
-		slaves.remove(slave);
+		for (int i = 0, length = slaves.length; i < length; i++) {
+			if (slaves[i] == slave) {
+				slaves[i] = null;
+			}
+		}
 	}
 
 	/**
@@ -122,11 +117,9 @@ public class TimeLinesLeader {
 	 */
 	public void removeAllSlaves() {
 		removeAllTimeBlocks();
-		Iterator<TimeLineView> iterator = slaves.iterator();
-		while (iterator.hasNext()) {
-			TimeLineView slave = iterator.next();
-			AndroidUtils.recycleView(slave);
-			iterator.remove();
+		for (int i = 0, length = slaves.length; i < length; i++) {
+			AndroidUtils.recycleView(slaves[i]);
+			slaves[i] = null;
 		}
 	}
 
@@ -134,12 +127,9 @@ public class TimeLinesLeader {
 	 * Removes dead slaves
 	 */
 	public void filterSlaves() {
-		Iterator<TimeLineView> iterator = slaves.iterator();
-		while (iterator.hasNext()) {
-			TimeLineView slave = iterator.next();
-			if (slave.getParent() == null) {
-				AndroidUtils.recycleView(slave);
-				iterator.remove();
+		for (TimeLineView slave : slaves) {
+			if (slave != null && slave.getParent() == null) {
+				removeSlave(slave, true);
 			}
 		}
 	}
@@ -180,15 +170,6 @@ public class TimeLinesLeader {
 	}
 
 	/**
-	 * Invokes {@link reo7sp.cleverday.ui.view.TimeLineView#update()} of all slaves
-	 */
-	public void updateSlaves() {
-		for (TimeLineView slave : slaves) {
-			slave.update();
-		}
-	}
-
-	/**
 	 * @return current time line
 	 */
 	public TimeLineView getCurrent() {
@@ -220,20 +201,6 @@ public class TimeLinesLeader {
 		if (changed) {
 			updateScroll(false);
 		}
-	}
-
-	/**
-	 * @param block block
-	 * @return {@link TimeBlockView} instance of block
-	 */
-	public TimeBlockView getTimeBlockView(TimeBlock block) {
-		for (TimeLineView slave : slaves) {
-			TimeBlockView view = slave.getView(block);
-			if (view != null) {
-				return view;
-			}
-		}
-		return null;
 	}
 
 	/**

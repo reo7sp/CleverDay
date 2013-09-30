@@ -1,7 +1,5 @@
 package reo7sp.cleverday;
 
-import android.os.Process;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -17,7 +15,6 @@ public class AsyncActionQueue extends ActionQueue implements Runnable {
 
 	@Override
 	public void run() {
-		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 		try {
 			while (!thread.isInterrupted()) {
 				// running next task
