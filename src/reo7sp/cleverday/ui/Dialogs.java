@@ -23,7 +23,6 @@ import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
 import reo7sp.cleverday.ui.colors.SimpleColor;
-import reo7sp.cleverday.ui.view.SteppedTimePicker;
 import reo7sp.cleverday.utils.DateUtils;
 import reo7sp.cleverday.utils.StringUtils;
 

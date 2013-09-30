@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<PreferenceCategory android:title="@string/appearance">
-		<reo7sp.cleverday.ui.preference.TimePreference
+		<reo7sp.cleverday.ui.TimePreference
 				android:defaultValue="9:00"
 				android:key="pref_day_start"
 				android:summary="@string/time_line_scroll_start"

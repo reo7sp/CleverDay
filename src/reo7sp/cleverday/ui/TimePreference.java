@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.preference;
+package reo7sp.cleverday.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;

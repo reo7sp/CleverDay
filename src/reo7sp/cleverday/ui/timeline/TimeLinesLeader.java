@@ -1,13 +1,11 @@
-package reo7sp.cleverday.ui;
+package reo7sp.cleverday.ui.timeline;
 
 import java.util.Calendar;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.data.TimeBlock;
+import reo7sp.cleverday.ui.TimePreference;
 import reo7sp.cleverday.ui.activity.MainActivity;
-import reo7sp.cleverday.ui.preference.TimePreference;
-import reo7sp.cleverday.ui.view.TimeBlockView;
-import reo7sp.cleverday.ui.view.TimeLineView;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.DateUtils;
 
@@ -36,47 +34,22 @@ public class TimeLinesLeader {
 	 * Sets right step and scroll y
 	 */
 	public void init() {
-		scrollY = TimePreference.getHour(Core.getPreferences().getString("pref_day_start", "9:00")) * TimeLineView.STEP - TimeLineView.STEP / 2;
+		int nextScrollY = TimePreference.getHour(Core.getPreferences().getString("pref_day_start", "9:00")) * TimeLineView.STEP - TimeLineView.STEP / 2;
 		int alternativeScrollY = DateUtils.getFromTime(Core.getCreationTime(), Calendar.HOUR_OF_DAY) * TimeLineView.STEP - TimeLineView.STEP / 2;
-		if (alternativeScrollY > scrollY) {
-			scrollY = alternativeScrollY;
+		if (alternativeScrollY > nextScrollY) {
+			nextScrollY = alternativeScrollY;
 		}
-
-		// updating
-		setScrollY(scrollY);
-		updateScroll(true);
+		setScrollY(nextScrollY);
 	}
 
 	/**
-	 * Scrolls time lines by specified y
-	 *
-	 * @param y step
+	 * Updates scroll of all time lines
 	 */
-	public void scrollBy(int y) {
-		setScrollY(getScrollY() + y);
-	}
-
-	/**
-	 * Scrolls time lines to specified y
-	 *
-	 * @param y y to set
-	 */
-	public void scrollTo(int y) {
-		setScrollY(y);
-	}
-
-	/**
-	 * Updates scroll of all time lines or only current
-	 *
-	 * @param all all time lines
-	 */
-	public void updateScroll(boolean all) {
-		if (all) {
-			for (TimeLineView slave : slaves) {
+	private void updateScroll() {
+		for (TimeLineView slave : slaves) {
+			if (slave != null) {
 				slave.scrollTo(0, scrollY);
 			}
-		} else if (getCurrent() != null) {
-			getCurrent().scrollTo(0, scrollY);
 		}
 	}
 
@@ -85,7 +58,7 @@ public class TimeLinesLeader {
 	 *
 	 * @param slave slave to add
 	 */
-	public void addSlave(TimeLineView slave) {
+	void addSlave(TimeLineView slave) {
 		filterSlaves();
 		for (int i = 0, length = slaves.length; i < length; i++) {
 			if (slaves[i] == null) {
@@ -96,15 +69,11 @@ public class TimeLinesLeader {
 	}
 
 	/**
-	 * Removes slave and if needed, destroy it
+	 * Removes slave
 	 *
-	 * @param slave   slave to remove
-	 * @param destroy destroy slave completely
+	 * @param slave slave to remove
 	 */
-	public void removeSlave(TimeLineView slave, boolean destroy) {
-		if (destroy) {
-			AndroidUtils.recycleView(slave);
-		}
+	private void removeSlave(TimeLineView slave) {
 		for (int i = 0, length = slaves.length; i < length; i++) {
 			if (slaves[i] == slave) {
 				slaves[i] = null;
@@ -113,9 +82,9 @@ public class TimeLinesLeader {
 	}
 
 	/**
-	 * Removes all slaves and destroys them
+	 * Removes all slaves and and its time blocks
 	 */
-	public void removeAllSlaves() {
+	public void clean() {
 		removeAllTimeBlocks();
 		for (int i = 0, length = slaves.length; i < length; i++) {
 			AndroidUtils.recycleView(slaves[i]);
@@ -126,10 +95,10 @@ public class TimeLinesLeader {
 	/**
 	 * Removes dead slaves
 	 */
-	public void filterSlaves() {
+	private void filterSlaves() {
 		for (TimeLineView slave : slaves) {
 			if (slave != null && slave.getParent() == null) {
-				removeSlave(slave, true);
+				removeSlave(slave);
 			}
 		}
 	}
@@ -141,9 +110,11 @@ public class TimeLinesLeader {
 	 */
 	public TimeBlockView addTimeBlock(TimeBlock block) {
 		for (TimeLineView slave : slaves) {
-			final TimeBlockView view = slave.addTimeBlock(block);
-			if (view != null) {
-				return view;
+			if (slave != null) {
+				final TimeBlockView view = slave.addTimeBlock(block);
+				if (view != null) {
+					return view;
+				}
 			}
 		}
 		return null;
@@ -156,37 +127,43 @@ public class TimeLinesLeader {
 	 */
 	public void removeTimeBlock(TimeBlock block) {
 		for (TimeLineView slave : slaves) {
-			slave.removeTimeBlock(block);
+			if (slave != null) {
+				slave.removeTimeBlock(block);
+			}
 		}
 	}
 
 	/**
 	 * Removes all time blocks
 	 */
-	public void removeAllTimeBlocks() {
+	private void removeAllTimeBlocks() {
 		for (TimeLineView slave : slaves) {
-			slave.removeAllTimeBlocks();
+			if (slave != null) {
+				slave.removeAllTimeBlocks();
+			}
 		}
 	}
 
 	/**
 	 * @return current time line
 	 */
-	public TimeLineView getCurrent() {
+	TimeLineView getCurrent() {
 		return Core.getMainActivity().getCurrentTimeLine();
 	}
 
 	/**
 	 * @return the scroll y
 	 */
-	public int getScrollY() {
+	int getScrollY() {
 		return scrollY;
 	}
 
 	/**
-	 * @see TimeLinesLeader#scrollTo(int)
+	 * Sets scroll y of all time lines
+	 *
+	 * @param scrollY scroll y to set
 	 */
-	public void setScrollY(int scrollY) {
+	void setScrollY(int scrollY) {
 		boolean changed = false;
 		this.scrollY = scrollY;
 		if (this.scrollY < 0) {
@@ -197,9 +174,8 @@ public class TimeLinesLeader {
 		if (this.scrollY != scrollY) {
 			changed = true;
 		}
-
 		if (changed) {
-			updateScroll(false);
+			updateScroll();
 		}
 	}
 
@@ -208,9 +184,11 @@ public class TimeLinesLeader {
 	 */
 	public TimeBlockView getEditingBlock() {
 		for (TimeLineView slave : slaves) {
-			for (TimeBlockView view : slave.getTimeBlockViews()) {
-				if (view.isSelected()) {
-					return view;
+			if (slave != null) {
+				for (TimeBlockView view : slave.getTimeBlockViews()) {
+					if (view.isSelected()) {
+						return view;
+					}
 				}
 			}
 		}
@@ -218,23 +196,16 @@ public class TimeLinesLeader {
 	}
 
 	/**
-	 * @return true if any block is selected
-	 */
-	public boolean isAnyBlockSelected() {
-		return getEditingBlock() != null;
-	}
-
-	/**
 	 * @return the height of time line
 	 */
-	public int getHeight() {
+	private int getHeight() {
 		return TimeLineView.STEP * 25 + 8;
 	}
 
 	/**
 	 * @return the scroll max
 	 */
-	public int getScrollMax() {
+	int getScrollMax() {
 		return getHeight() - (getCurrent() == null ? 0 : getCurrent().getHeight());
 	}
 }

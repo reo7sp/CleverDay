@@ -22,9 +22,9 @@ import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.DataCenter;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.log.Log;
-import reo7sp.cleverday.ui.preference.TimePreference;
-import reo7sp.cleverday.ui.view.TimeBlockView;
-import reo7sp.cleverday.ui.view.TimeLineView;
+import reo7sp.cleverday.ui.TimePreference;
+import reo7sp.cleverday.ui.timeline.TimeBlockView;
+import reo7sp.cleverday.ui.timeline.TimeLineView;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.DateUtils;
 import reo7sp.cleverday.utils.StringUtils;
@@ -62,11 +62,13 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onPageSelected(int position) {
 				getActionBar().setTitle(StringUtils.makeFirstCharUpperCased(viewPager.getAdapter().getPageTitle(position).toString()));
-				if (Core.getTimeLinesLeader().isAnyBlockSelected() && viewPagerPos != position) {
+				if (viewPagerPos != position) {
 					TimeBlockView view = Core.getTimeLinesLeader().getEditingBlock();
-					TimeBlock block = view.getBlock();
-					block.setBounds(block.getUtcStart() + TimeConstants.DAY * -1 * (viewPagerPos - position), block.getUtcEnd() + TimeConstants.DAY * -1 * (viewPagerPos - position), true);
-					view.update(true);
+					if (view != null) {
+						TimeBlock block = view.getBlock();
+						block.setBounds(block.getUtcStart() + TimeConstants.DAY * -1 * (viewPagerPos - position), block.getUtcEnd() + TimeConstants.DAY * -1 * (viewPagerPos - position), true);
+						view.update(true);
+					}
 				}
 				currentTimeLine = (TimeLineView) viewPager.findViewWithTag("tl_" + position);
 				viewPagerPos = position;
@@ -97,7 +99,7 @@ public class MainActivity extends FragmentActivity {
 		super.onDestroy();
 
 		// cleaning up
-		Core.getTimeLinesLeader().removeAllSlaves();
+		Core.getTimeLinesLeader().clean();
 		AndroidUtils.recycleView(findViewById(R.layout.main_activity));
 	}
 

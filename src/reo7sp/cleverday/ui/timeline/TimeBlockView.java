@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.view;
+package reo7sp.cleverday.ui.timeline;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -19,6 +19,7 @@ import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.BitmapFactory;
 import reo7sp.cleverday.ui.Location2D;
+import reo7sp.cleverday.ui.PopupBar;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
 import reo7sp.cleverday.ui.colors.SimpleColor;
 import reo7sp.cleverday.utils.AndroidUtils;
@@ -32,6 +33,7 @@ public class TimeBlockView {
 	private boolean isDragging;
 	private ActionMode actionMode;
 	private Location2D dragStartLocation;
+	private String[] notes;
 	private boolean deselectAfterDragging;
 	private int y;
 	private int height;
@@ -39,7 +41,6 @@ public class TimeBlockView {
 	private PositionAnimation positionAnimation;
 	private SizeAnimation sizeAnimation;
 	private AlphaAnimation alphaAnimation;
-	private String[] notes;
 
 	TimeBlockView(TimeLineView timeLine, TimeBlock block) {
 		if (block == null) {
@@ -121,17 +122,10 @@ public class TimeBlockView {
 	 * @param toFullyVisible true if alpha must be incremented to 255
 	 * @param onStop         stop listener
 	 */
-	public void startAlphaAnimation(boolean toFullyVisible, Runnable onStop) {
+	void startAlphaAnimation(boolean toFullyVisible, Runnable onStop) {
 		Core.getSyncActionQueue().removeAction(alphaAnimation);
 		alphaAnimation = new AlphaAnimation(toFullyVisible, onStop);
 		Core.getSyncActionQueue().addAction(alphaAnimation);
-	}
-
-	/**
-	 * Updates block
-	 */
-	public void update() {
-		update(false);
 	}
 
 	/**
@@ -283,7 +277,7 @@ public class TimeBlockView {
 	/**
 	 * @return true if is dragging
 	 */
-	public boolean isDragging() {
+	boolean isDragging() {
 		return isDragging;
 	}
 
@@ -292,7 +286,7 @@ public class TimeBlockView {
 	 *
 	 * @param dragStartLocation drag start location
 	 */
-	public void startDragging(Location2D dragStartLocation, boolean deselectAfterDragging) {
+	void startDragging(Location2D dragStartLocation, boolean deselectAfterDragging) {
 		if (isSelected) {
 			isDragging = true;
 			this.dragStartLocation = dragStartLocation;
@@ -303,7 +297,7 @@ public class TimeBlockView {
 	/**
 	 * Stops drag mode of view
 	 */
-	public void stopDragging() {
+	void stopDragging() {
 		isDragging = false;
 		if (deselectAfterDragging) {
 			setSelected(false);
@@ -320,14 +314,14 @@ public class TimeBlockView {
 	/**
 	 * @return true if is selected
 	 */
-	public boolean isSelected() {
+	boolean isSelected() {
 		return isSelected;
 	}
 
 	/**
 	 * @param isSelected true if block must be selected
 	 */
-	public void setSelected(final boolean isSelected) {
+	void setSelected(final boolean isSelected) {
 		// stopping dragging if unselected
 		if (!isSelected) {
 			isDragging = false;
@@ -360,35 +354,37 @@ public class TimeBlockView {
 	/**
 	 * @return the drag start location
 	 */
-	public Location2D getDragStartLocation() {
+	Location2D getDragStartLocation() {
 		return dragStartLocation;
 	}
 
 	/**
 	 * @return the y
 	 */
-	public int getY() {
+	int getY() {
 		return positionAnimation == null ? y : positionAnimation.nextY;
 	}
 
 	/**
 	 * @return the height
 	 */
-	public int getHeight() {
+	int getHeight() {
 		return sizeAnimation == null ? height : sizeAnimation.nextHeight;
 	}
 
 	private class PositionAnimation implements Runnable {
-		public final int nextY = generateY();
+		private final int nextY = generateY();
 
 		@Override
 		public void run() {
 			if (nextY != y) {
 				// if view is away from screen bounds, block way will be shorted
-				if (y < timeLine.getScrollY() - getHeight() && nextY > timeLine.getScrollY() - getHeight()) {
-					y = timeLine.getScrollY() - getHeight();
-				} else if (y > timeLine.getScrollY() + timeLine.getHeight() && nextY < timeLine.getScrollY() + timeLine.getHeight()) {
-					y = timeLine.getScrollY() + timeLine.getHeight();
+				int a = timeLine.getScrollY() - getHeight();
+				int b = timeLine.getScrollY() + getHeight();
+				if (y < a && nextY > a) {
+					y = a;
+				} else if (y > b && nextY < b) {
+					y = b;
 				}
 
 				// calculating y
@@ -410,7 +406,7 @@ public class TimeBlockView {
 	}
 
 	private class SizeAnimation implements Runnable {
-		public final int nextHeight = generateHeight();
+		private final int nextHeight = generateHeight();
 
 		@Override
 		public void run() {
@@ -499,10 +495,10 @@ public class TimeBlockView {
 	}
 
 	private class AlphaAnimation implements Runnable {
-		public final boolean toFullyVisible;
-		public final Runnable onStop;
+		private final boolean toFullyVisible;
+		private final Runnable onStop;
 
-		public AlphaAnimation(boolean toFullyVisible, Runnable onStop) {
+		private AlphaAnimation(boolean toFullyVisible, Runnable onStop) {
 			this.toFullyVisible = toFullyVisible;
 			this.onStop = onStop;
 		}

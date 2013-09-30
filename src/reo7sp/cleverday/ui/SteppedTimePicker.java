@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.view;
+package reo7sp.cleverday.ui;
 
 import android.content.Context;
 import android.widget.LinearLayout;

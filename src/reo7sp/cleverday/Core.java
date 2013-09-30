@@ -12,8 +12,8 @@ import java.util.Random;
 import reo7sp.cleverday.data.DataCenter;
 import reo7sp.cleverday.log.Log;
 import reo7sp.cleverday.service.NotificationService;
-import reo7sp.cleverday.ui.TimeLinesLeader;
 import reo7sp.cleverday.ui.activity.MainActivity;
+import reo7sp.cleverday.ui.timeline.TimeLinesLeader;
 import reo7sp.cleverday.utils.DateUtils;
 
 public class Core {
