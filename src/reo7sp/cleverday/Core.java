@@ -18,11 +18,11 @@ import reo7sp.cleverday.utils.DateUtils;
 
 public class Core {
 	public static final String VERSION = "0.3.1+";
-	private static final Random RANDOM = new Random();
-	private static final ActionQueue SYNC_ACTION_QUEUE = new SyncActionQueue();
-	private static final ActionQueue ASYNC_ACTION_QUEUE = new AsyncActionQueue();
-	private static final Paint PAINT = new Paint();
-	private static final DateFormatter DATE_FORMATTER = DateFormatter.getInstance();
+	private static final Random random = new Random();
+	private static final ActionQueue syncActionQueue = new SyncActionQueue();
+	private static final ActionQueue asyncActionQueue = new AsyncActionQueue();
+	private static final Paint paint = new Paint();
+	private static final DateFormatter dateFormatter = DateFormatter.getInstance();
 	private static Vibrator vibrator;
 	private static MainActivity mainActivity;
 	private static Context context;
@@ -44,7 +44,7 @@ public class Core {
 	 * @return the random
 	 */
 	public static Random getRandom() {
-		return RANDOM;
+		return random;
 	}
 
 	/**
@@ -107,28 +107,28 @@ public class Core {
 	 * @return the paint
 	 */
 	public static Paint getPaint() {
-		return PAINT;
+		return paint;
 	}
 
 	/**
 	 * @return the sync queue
 	 */
 	public static ActionQueue getSyncActionQueue() {
-		return SYNC_ACTION_QUEUE;
+		return syncActionQueue;
 	}
 
 	/**
 	 * @return the async queue
 	 */
 	public static ActionQueue getAsyncActionQueue() {
-		return ASYNC_ACTION_QUEUE;
+		return asyncActionQueue;
 	}
 
 	/**
 	 * @return the date format factory
 	 */
 	public static DateFormatter getDateFormatter() {
-		return DATE_FORMATTER;
+		return dateFormatter;
 	}
 
 	public static class Builder {
