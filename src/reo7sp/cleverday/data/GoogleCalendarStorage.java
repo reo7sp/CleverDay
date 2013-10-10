@@ -9,16 +9,16 @@ import android.provider.CalendarContract;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.TimeZone;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.ui.colors.SimpleColor;
 import reo7sp.cleverday.utils.DateUtils;
 
 /**
  * Created by reo7sp on 8/1/13 at 9:08 PM
  */
-public class GoogleCalendarStorage extends DataStorage {
+public class GoogleCalendarStorage extends ExternalDataStorage {
 	private static final String[] CALENDAR_REQUEST_PROJECTION = new String[] {
 			CalendarContract.Calendars._ID,
 			CalendarContract.Calendars.ACCOUNT_NAME,
@@ -38,55 +38,64 @@ public class GoogleCalendarStorage extends DataStorage {
 	private final Collection<GoogleCalendar> calendars = new HashSet<GoogleCalendar>();
 	private GoogleCalendar mainCalendar;
 
-	GoogleCalendarStorage(DataCenter dataCenter) {
-		super(dataCenter);
+	GoogleCalendarStorage() {
 		instance = this;
 		receiveCalendars();
-		update();
+		updateSettings();
+	}
+
+	/**
+	 * Singleton method
+	 *
+	 * @return the instance
+	 */
+	public static GoogleCalendarStorage getInstance() {
+		return instance;
 	}
 
 	/**
 	 * @return all google calendars
 	 */
-	public static Collection<GoogleCalendar> getCalendars() {
+	public Collection<GoogleCalendar> getCalendars() {
 		return instance.calendars;
 	}
 
 	/**
 	 * @return the current main calendar
 	 */
-	public static GoogleCalendar getMainCalendar() {
+	public GoogleCalendar getMainCalendar() {
 		return instance.mainCalendar;
 	}
 
 	/**
 	 * Updates main calendar
 	 */
-	public static void updateSettings() {
-		instance.update();
-	}
+	public void updateSettings() {
+		String calendarName = Core.getPreferences().getString("pref_google_calendar", "none");
 
-	private synchronized void update() {
-		String calendarPref = Core.getPreferences().getString("pref_google_calendar", "none");
-		if (mainCalendar == null || !calendarPref.equals("" + mainCalendar.getID())) {
+		if (mainCalendar == null || !calendarName.equals("" + mainCalendar.getID())) {
 			int id = -1;
 			try {
-				id = Integer.parseInt(calendarPref);
+				id = Integer.parseInt(calendarName);
 			} catch (Exception ignored) {
 			}
+
+			if (mainCalendar != null) {
+				for (SyncQueue.Commit commit : Core.getDataCenter().getSyncQueue().getCommits()) {
+					commit.setSynced(this);
+				}
+			}
+
 			mainCalendar = null;
-			for (GoogleCalendar calendar : calendars) {
-				if (calendar.getID() == id) {
-					mainCalendar = calendar;
-					break;
+			if (id != -1) {
+				for (GoogleCalendar calendar : calendars) {
+					if (calendar.getID() == id) {
+						mainCalendar = calendar;
+						break;
+					}
 				}
 			}
 		}
-	}
-
-	@Override
-	void load() {
-		// nothing
 	}
 
 	@Override
@@ -105,76 +114,83 @@ public class GoogleCalendarStorage extends DataStorage {
 			TimeZone timeZone = TimeZone.getTimeZone(cursor.getString(5));
 			int color = cursor.getInt(6);
 
-			TimeBlock block = null;
-			for (TimeBlock loopBlock : timeBlocks) {
-				if (loopBlock.getGoogleSyncID() == id) {
-					block = loopBlock;
-					break;
-				}
-			}
-			if (block == null) {
-				block = new TimeBlock(Core.getRandom().nextInt());
-				block.setGoogleSyncID(id);
+			SyncQueue.Commit commit = getCommitWithGoogleSyncID(id);
+			if (commit != null && commit.isDead() && !commit.isSynced(this)) {
+				continue;
 			}
 
-			if (block.getModifyType() != TimeBlock.ModifyType.UPDATE || block.getModifyType() != TimeBlock.ModifyType.REMOVE) {
+			TimeBlock block = getBlockWithGoogleSyncID(id);
+			if (block == null) {
+				block = Core.getDataCenter().newTimeBlock();
 				block.setTitle(title);
 				block.setNotes(description);
 				block.setBounds(DateUtils.getUtcTime(start, timeZone), DateUtils.getUtcTime(end, timeZone), true);
+				block.setGoogleSyncID(id);
 				if (canUseCleverDayColors()) {
 					block.setColor(color);
 				}
-			}
-
-			if (!timeBlocks.add(block)) {
-				removeFromGoogle(id);
+			} else {
+				if (commit == null || commit.isSynced(this)) {
+					block.setTitle(title);
+					block.setNotes(description);
+					block.setBounds(DateUtils.getUtcTime(start, timeZone), DateUtils.getUtcTime(end, timeZone), true);
+					if (canUseCleverDayColors() && SimpleColor.contains(color)) {
+						block.setColor(color);
+					}
+				} else if (!commit.isDead()) {
+					if (!commit.getChanges()[TimeBlock.TITLE_VALUE_ID]) {
+						block.setTitle(title);
+					}
+					if (!commit.getChanges()[TimeBlock.NOTES_VALUE_ID]) {
+						block.setNotes(description);
+					}
+					if (!commit.getChanges()[TimeBlock.START_VALUE_ID] && !commit.getChanges()[TimeBlock.END_VALUE_ID]) {
+						block.setBounds(DateUtils.getUtcTime(start, timeZone), DateUtils.getUtcTime(end, timeZone), true);
+					}
+					if (!commit.getChanges()[TimeBlock.COLOR_VALUE_ID] && canUseCleverDayColors()) {
+						block.setColor(color);
+					}
+				}
 			}
 		}
 		cursor.close();
 	}
 
+	private SyncQueue.Commit getCommitWithGoogleSyncID(long id) {
+		for (SyncQueue.Commit commit : Core.getDataCenter().getSyncQueue().getCommits()) {
+			if (commit.getGoogleSyncID() == id) {
+				return commit;
+			}
+		}
+		return null;
+	}
+
+	private TimeBlock getBlockWithGoogleSyncID(long id) {
+		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
+			if (block.getGoogleSyncID() == id) {
+				return block;
+			}
+		}
+		return null;
+	}
+
 	@Override
-	void save() {
+	void send() {
 		if (!canModifyGoogle()) {
 			return;
 		}
 
-		for (Iterator<TimeBlock> iterator = timeBlocks.iterator(); iterator.hasNext(); ) {
-			TimeBlock block = iterator.next();
-
-			if (block.getModifyType() == null) {
+		for (SyncQueue.Commit commit : Core.getDataCenter().getSyncQueue().getCommits()) {
+			if (commit.isSynced(this)) {
 				continue;
 			}
-			switch (block.getModifyType()) {
-				case ADD:
-					addToGoogle(block);
-					break;
-				case UPDATE:
-					updateInGoogle(block);
-					break;
-				case REMOVE:
-					removeFromGoogle(block.getGoogleSyncID());
-					iterator.remove();
-					break;
+
+			if (commit.isDead()) {
+				removeFromGoogle(commit.getGoogleSyncID());
+			} else {
+				updateInGoogle(commit);
 			}
-		}
-	}
-
-	@Override
-	protected ActionOnSyncProblem actionOnSyncProblem() {
-		return ActionOnSyncProblem.REMOVE_FROM_BUFFER;
-	}
-
-	@Override
-	void syncDataCenterWithMe() {
-		super.syncDataCenterWithMe();
-		for (Iterator<TimeBlock> iterator = timeBlocks.iterator(); iterator.hasNext(); ) {
-			TimeBlock block = iterator.next();
-
-			if (block.getGoogleSyncID() != -1 && !isInGoogle(block.getGoogleSyncID())) {
-				block.remove();
-				iterator.remove();
-			}
+			commit.setSynced(this);
 		}
 	}
 
@@ -192,12 +208,7 @@ public class GoogleCalendarStorage extends DataStorage {
 	}
 
 	private void addToGoogle(TimeBlock block) {
-		if (isInGoogle(block.getGoogleSyncID())) {
-			updateInGoogle(block);
-			return;
-		}
-
-		if (!canModifyGoogle() || mainCalendar == null) {
+		if (!canModifyGoogle() || mainCalendar == null || block == null) {
 			return;
 		}
 
@@ -217,26 +228,37 @@ public class GoogleCalendarStorage extends DataStorage {
 		block.setGoogleSyncID(id);
 	}
 
-	private void updateInGoogle(TimeBlock block) {
-		if (block.getGoogleSyncID() == -1 || !isInGoogle(block.getGoogleSyncID())) {
+	private void updateInGoogle(SyncQueue.Commit commit) {
+		if (!canModifyGoogle() || mainCalendar == null) {
+			return;
+		}
+
+		TimeBlock block = Core.getDataCenter().getBlock(commit.getID());
+		if (block == null) {
+			return;
+		}
+
+		if (commit.getGoogleSyncID() == -1 || !isInGoogle(commit.getGoogleSyncID())) {
 			addToGoogle(block);
 			return;
 		}
 
-		if (!canModifyGoogle() || block.getGoogleSyncID() == -1) {
-			return;
-		}
-
 		ContentValues values = new ContentValues();
-		values.put(CalendarContract.Events.TITLE, block.getTitle());
-		values.put(CalendarContract.Events.DESCRIPTION, block.getNotes());
-		values.put(CalendarContract.Events.DTSTART, block.getStart());
-		values.put(CalendarContract.Events.DTEND, block.getEnd());
-		values.put(CalendarContract.Events.CALENDAR_ID, mainCalendar.getID());
-		values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
-		if (canUseCleverDayColors()) {
+		if (commit.getChanges()[TimeBlock.TITLE_VALUE_ID]) {
+			values.put(CalendarContract.Events.TITLE, block.getTitle());
+		}
+		if (commit.getChanges()[TimeBlock.NOTES_VALUE_ID]) {
+			values.put(CalendarContract.Events.DESCRIPTION, block.getNotes());
+		}
+		if (commit.getChanges()[TimeBlock.START_VALUE_ID] || commit.getChanges()[TimeBlock.END_VALUE_ID]) {
+			values.put(CalendarContract.Events.DTSTART, block.getStart());
+			values.put(CalendarContract.Events.DTEND, block.getEnd());
+			values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+		}
+		if (commit.getChanges()[TimeBlock.COLOR_VALUE_ID] && canUseCleverDayColors()) {
 			values.put(CalendarContract.Events.EVENT_COLOR, block.getColor());
 		}
+		values.put(CalendarContract.Events.CALENDAR_ID, mainCalendar.getID());
 
 		contentResolver.update(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, block.getGoogleSyncID()), values, null, null);
 	}

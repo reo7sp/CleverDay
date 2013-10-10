@@ -5,9 +5,14 @@ package reo7sp.cleverday;
  */
 public interface TimeConstants {
 	/**
+	 * Half of second in milliseconds
+	 */
+	public static final long HALF_OF_SECOND = 500; // 500 milliseconds
+
+	/**
 	 * Second in milliseconds
 	 */
-	public static final long SECOND = 1000; // 1000 milliseconds
+	public static final long SECOND = HALF_OF_SECOND * 2; // 1000 milliseconds
 
 	/**
 	 * Minute in milliseconds

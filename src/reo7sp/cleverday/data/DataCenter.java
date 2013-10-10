@@ -3,15 +3,15 @@ package reo7sp.cleverday.data;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.log.Log;
-import reo7sp.cleverday.service.NotificationService;
-import reo7sp.cleverday.ui.widget.StandardWidget;
 
 /**
  * Created by reo7sp on 8/1/13 at 2:12 PM
@@ -20,18 +20,20 @@ public class DataCenter {
 	private static DataCenter instance;
 	private final List<TimeBlock> timeBlocks = new ArrayList<TimeBlock>();
 	private final List<TimeBlock> immutableTimeBlocks = Collections.unmodifiableList(timeBlocks);
-	private final DataBaseCommunicator dbCommunicator = new DataBaseCommunicator();
-	private final DataStorageLeader dataStorageLeader = new DataStorageLeader(this);
+	private final DBCommunicator dbCommunicator = new DBCommunicator();
+	private final DataStorageLeader dataStorageLeader = new DataStorageLeader();
+	private final Collection<DataInvalidateListener> invalidateListeners = new HashSet<DataInvalidateListener>();
+	private final SyncQueue syncQueue = new SyncQueue();
 	private final Comparator<TimeBlock> timeBlockComparator = new Comparator<TimeBlock>() {
 		@Override
 		public int compare(TimeBlock first, TimeBlock second) {
 			return (int) (first.getUtcStart() - second.getUtcStart());
 		}
 	};
-	private boolean invalidated;
 
 	private DataCenter() {
 		startThread();
+		startSyncThread();
 	}
 
 	/**
@@ -57,7 +59,7 @@ public class DataCenter {
 	 * @return new time block
 	 */
 	public TimeBlock newTimeBlock() {
-		TimeBlock block = new TimeBlock();
+		TimeBlock block = new TimeBlock(Core.getRandom().nextLong());
 		if (addTimeBlock(block) != null) {
 			block = null;
 		}
@@ -80,18 +82,16 @@ public class DataCenter {
 		}
 
 		if (timeBlocks.contains(block)) {
-			if (block.getModifyType() == TimeBlock.ModifyType.REMOVE) { // undo remove
-				block.markToAdd();
-			} else {
-				Log.w("Data", "Can't add time block \"" + block.getTitle() + "\" with id " + block.getID() + " to data center. Cause: " + NotAddedCause.ALREADY_IS);
-				return NotAddedCause.ALREADY_IS;
-			}
+			Log.w("Data", "Can't add time block \"" + block.getTitle() + "\" with id " + block.getID() + " to data center. Cause: " + NotAddedCause.ALREADY_IS);
+			return NotAddedCause.ALREADY_IS;
 		} else if (hasBlock(block.getID())) {
 			Log.w("Data", "Can't add time block \"" + block.getTitle() + "\" with id " + block.getID() + " to data center. Cause: " + NotAddedCause.TWIN);
 			return NotAddedCause.TWIN;
 		}
 
 		timeBlocks.add(block);
+		syncQueue.newCommit(block);
+		Core.getHistoryStorage().addToHistory(block);
 		Log.i("Data", "Time block \"" + block.getTitle() + "\" with id " + block.getID() + " added! Collection size: " + timeBlocks.size());
 
 		if (Core.getTimeLinesLeader() != null) {
@@ -113,7 +113,8 @@ public class DataCenter {
 	 */
 	synchronized void removeTimeBlock(final TimeBlock block) {
 		timeBlocks.remove(block);
-		block.markToRemove();
+		dataStorageLeader.remove(block);
+		syncQueue.newCommit(block);
 		Log.i("Data", "Time block \"" + block.getTitle() + "\" with id " + block.getID() + " removed! Collection size: " + timeBlocks.size());
 
 		if (Core.getTimeLinesLeader() != null) {
@@ -126,27 +127,43 @@ public class DataCenter {
 		}
 	}
 
+	private void startSyncThread() {
+		new Thread("DataCenter-AutoSync") {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(30000);
+					if (Core.isNetOn() && Core.getMainActivity() != null) {
+						syncData();
+					}
+				} catch (InterruptedException ignored) {
+				}
+			}
+		}.start();
+	}
+
 	private void startThread() {
 		new Thread("DataCenter") {
 			@Override
 			public void run() {
 				try {
 					synchronized (DataCenter.this) {
+						dataStorageLeader.init();
 						load();
+						syncQueue.load();
+
 						while (!isInterrupted()) {
-							if (invalidated) {
-								dataStorageLeader.sync();
+							if (isDataChanged()) {
 								dataStorageLeader.save();
+								syncQueue.save();
 
 								Collections.sort(timeBlocks, timeBlockComparator);
 
-								NotificationService.invalidate();
-								StandardWidget.invalidate();
-
-								for (TimeBlock block : timeBlocks) {
-									block.setSaved();
+								for (DataInvalidateListener listener : invalidateListeners) {
+									listener.onDataInvalidate();
 								}
-								invalidated = false;
+
+								saveAll();
 							}
 
 							DataCenter.this.wait(TimeConstants.SECOND);
@@ -158,13 +175,37 @@ public class DataCenter {
 		}.start();
 	}
 
+	/**
+	 * Loads all data from local data storages
+	 */
 	private void load() {
 		Log.i("Data", "Loading data");
 		dataStorageLeader.load();
+		saveAll();
+		Log.i("Data", "Loaded!");
+	}
+
+	/**
+	 * Notifies every block that they has been saved
+	 */
+	private void saveAll() {
 		for (TimeBlock block : timeBlocks) {
 			block.setSaved();
 		}
-		Log.i("Data", "Loaded!");
+	}
+
+	/**
+	 * Checks every block if one of them was changed
+	 *
+	 * @return true if one of time blocks was changed
+	 */
+	private boolean isDataChanged() {
+		for (TimeBlock block : timeBlocks) {
+			if (block.isChanged()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -178,7 +219,7 @@ public class DataCenter {
 	 * @param id id of block
 	 * @return block with specified id
 	 */
-	public TimeBlock getBlock(int id) {
+	public TimeBlock getBlock(long id) {
 		for (TimeBlock block : timeBlocks) {
 			if (block.getID() == id) {
 				return block;
@@ -191,45 +232,56 @@ public class DataCenter {
 	 * @param id id of block
 	 * @return true if block with specified id exists
 	 */
-	public boolean hasBlock(int id) {
+	public boolean hasBlock(long id) {
 		return getBlock(id) != null;
 	}
 
 	/**
-	 * Sets special mark which saves data later
-	 */
-	void invalidate() {
-		invalidated = true;
-	}
-
-	/**
-	 * @return true if data was invalidated
-	 */
-	public boolean isInvalidated() {
-		return invalidated;
-	}
-
-	/**
-	 * @return the writable sqlite db instance
+	 * @return the database
 	 */
 	SQLiteDatabase getDB() {
 		return dbCommunicator.getDB();
 	}
 
 	/**
-	 * Receive new data from every data storage. This method doesn't perform receiving but this method schedules it
+	 * @return the sync queue
 	 */
-	public void receiveData() {
+	SyncQueue getSyncQueue() {
+		return syncQueue;
+	}
+
+	/**
+	 * Syncs data with every external data storage
+	 */
+	public void syncData() {
 		Core.getAsyncActionQueue().addAction(new Runnable() {
 			@Override
 			public void run() {
 				synchronized (DataCenter.this) {
-					Log.i("DataCenter", "Receiving data");
-					dataStorageLeader.receive();
-					Log.i("DataCenter", "Received!");
+					Log.i("DataCenter", "Syncing data");
+					dataStorageLeader.sync();
+					Log.i("DataCenter", "Synced!");
 				}
 			}
 		});
+	}
+
+	/**
+	 * Registers data invalidate listener
+	 *
+	 * @param listener listener to register
+	 */
+	public synchronized void registerDataInvalidateListener(DataInvalidateListener listener) {
+		invalidateListeners.add(listener);
+	}
+
+	/**
+	 * Unregisters data invalidate listener
+	 *
+	 * @param listener listener to unregister
+	 */
+	public synchronized void unregisterDataInvalidateListener(DataInvalidateListener listener) {
+		invalidateListeners.remove(listener);
 	}
 
 	public static enum NotAddedCause {

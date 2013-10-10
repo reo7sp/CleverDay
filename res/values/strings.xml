@@ -84,4 +84,5 @@
 	<string name="edit_fast_text">Have plans suddenly been changed? Just move remaining</string>
 	<string name="history">History</string>
 	<string name="no_history">You haven\'t created any task yet</string>
+	<string name="syncing">Syncing…</string>
 </resources>

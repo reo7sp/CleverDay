@@ -10,6 +10,8 @@ import android.preference.PreferenceManager;
 import java.util.Random;
 
 import reo7sp.cleverday.data.DataCenter;
+import reo7sp.cleverday.data.GoogleCalendarStorage;
+import reo7sp.cleverday.data.HistoryStorage;
 import reo7sp.cleverday.log.Log;
 import reo7sp.cleverday.service.NotificationService;
 import reo7sp.cleverday.ui.activity.MainActivity;
@@ -29,6 +31,7 @@ public class Core {
 	private static SharedPreferences preferences;
 	private static long creationTime = System.currentTimeMillis();
 	private static boolean isBuilt;
+	private static boolean isNetOn;
 
 	private Core() {
 	}
@@ -111,7 +114,7 @@ public class Core {
 	}
 
 	/**
-	 * @return the sync queue
+	 * @return the receive queue
 	 */
 	public static ActionQueue getSyncActionQueue() {
 		return syncActionQueue;
@@ -122,6 +125,34 @@ public class Core {
 	 */
 	public static ActionQueue getAsyncActionQueue() {
 		return asyncActionQueue;
+	}
+
+	/**
+	 * @return the history storage
+	 */
+	public static HistoryStorage getHistoryStorage() {
+		return HistoryStorage.getInstance();
+	}
+
+	/**
+	 * @return the google calendar storage
+	 */
+	public static GoogleCalendarStorage getGoogleCalendarStorage() {
+		return GoogleCalendarStorage.getInstance();
+	}
+
+	/**
+	 * @return true if net is on and this type of net wasn't forbidden
+	 */
+	public static boolean isNetOn() {
+		return isNetOn;
+	}
+
+	/**
+	 * @param netOn true if net is on and this type of net wasn't forbidden
+	 */
+	static void setNetOn(boolean netOn) {
+		isNetOn = netOn;
 	}
 
 	/**
@@ -165,8 +196,11 @@ public class Core {
 				if (context == null && mainActivity != null && Core.context == null) {
 					context = mainActivity.getApplicationContext();
 				}
-				if (context == null && Core.context == null) {
-					return;
+				if (context == null) {
+					if (Core.context == null) {
+						return;
+					}
+					context = Core.context;
 				}
 				if (Core.context == null) {
 					Core.context = context;
@@ -192,6 +226,9 @@ public class Core {
 					Core.vibrator = (Vibrator) context.getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
 					context.startService(new Intent(context, NotificationService.class));
 				}
+
+				// invalidating net status
+				NetWatcher.invalidate(context);
 
 				// handling day change
 				if (!DateUtils.isInOneDay(System.currentTimeMillis(), Core.getCreationTime())) {

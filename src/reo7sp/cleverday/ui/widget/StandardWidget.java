@@ -9,14 +9,27 @@ import android.widget.RemoteViews;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
+import reo7sp.cleverday.data.DataInvalidateListener;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.activity.MainActivity;
 
 /**
  * Created by reo7sp on 9/6/13 at 6:11 PM
  */
-public class StandardWidget extends AppWidgetProvider {
+public class StandardWidget extends AppWidgetProvider implements DataInvalidateListener {
 	private static int[] appWidgetIds;
+
+	@Override
+	public void onEnabled(Context context) {
+		super.onEnabled(context);
+		Core.getDataCenter().registerDataInvalidateListener(this);
+	}
+
+	@Override
+	public void onDisabled(Context context) {
+		super.onDisabled(context);
+		Core.getDataCenter().unregisterDataInvalidateListener(this);
+	}
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -80,7 +93,8 @@ public class StandardWidget extends AppWidgetProvider {
 		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
 	}
 
-	public static void invalidate() {
+	@Override
+	public void onDataInvalidate() {
 		Intent intent = new Intent(Core.getContext(), StandardWidget.class);
 		intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);

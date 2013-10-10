@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
@@ -91,7 +92,7 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		DataCenter.getInstance().receiveData();
+		DataCenter.getInstance().syncData();
 	}
 
 	@Override
@@ -137,9 +138,16 @@ public class MainActivity extends FragmentActivity {
 
 				EditBlockActivity.showAdd(block);
 				break;
+
+			case R.id.action_main_menu_sync:
+				Toast.makeText(Core.getContext(), R.string.syncing, Toast.LENGTH_SHORT).show();
+				Core.getDataCenter().syncData();
+				break;
+
 			case R.id.action_main_menu_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
 				break;
+
 			case R.id.action_main_menu_send_log:
 				Intent sendIntent = new Intent();
 				sendIntent.setAction(Intent.ACTION_SEND);

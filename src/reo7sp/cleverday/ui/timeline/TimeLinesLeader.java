@@ -3,18 +3,21 @@ package reo7sp.cleverday.ui.timeline;
 import java.util.Calendar;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.data.DataInvalidateListener;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.TimePreference;
 import reo7sp.cleverday.ui.activity.MainActivity;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.DateUtils;
 
-public class TimeLinesLeader {
+public class TimeLinesLeader implements DataInvalidateListener {
 	private static TimeLinesLeader instance;
 	private final TimeLineView[] slaves = new TimeLineView[MainActivity.TIMELINES_COUNT];
 	private int scrollY;
 
 	private TimeLinesLeader() {
+		Core.getDataCenter().registerDataInvalidateListener(this);
+		initAutoUpdater();
 	}
 
 	/**
@@ -207,5 +210,36 @@ public class TimeLinesLeader {
 	 */
 	int getScrollMax() {
 		return getHeight() - (getCurrent() == null ? 0 : getCurrent().getHeight());
+	}
+
+	@Override
+	public void onDataInvalidate() {
+		updateSlaves();
+	}
+
+	/**
+	 * Updates all slaves
+	 */
+	private void updateSlaves() {
+		for (TimeLineView slave : slaves) {
+			if (slave != null) {
+				slave.update(false);
+			}
+		}
+	}
+
+	private void initAutoUpdater() {
+		new Thread("TimeLinesAutoUpdater") {
+			@Override
+			public void run() {
+				try {
+					while (!isInterrupted()) {
+						Thread.sleep(30000);
+						updateSlaves();
+					}
+				} catch (InterruptedException ignored) {
+				}
+			}
+		}.start();
 	}
 }

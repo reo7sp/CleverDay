@@ -42,7 +42,6 @@ public class TimeLineView extends View {
 	private final ScaleGestureDetector scaleGestureDetector;
 	private final GestureListener gestureListener = new MyGestureListener();
 	private final List<TimeBlockView> timeBlockViews = new TimeBlockViewsCollection();
-	private final boolean initialized;
 	private long time;
 	private ScrollAssistant scrollAssistant;
 
@@ -57,25 +56,8 @@ public class TimeLineView extends View {
 		updateTime(time);
 		scrollTo(0, Core.getTimeLinesLeader().getScrollY());
 
-		initialized = true;
+		update(false);
 		Log.i("TimeLine", "Created new time line on " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time));
-
-		initUpdater();
-	}
-
-	/**
-	 * Initializes timer which updates time line
-	 */
-	private void initUpdater() {
-		postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (Core.getTimeLinesLeader().getCurrent() == TimeLineView.this) {
-					update(false);
-				}
-				postDelayed(this, 250);
-			}
-		}, 250);
 	}
 
 	/**
@@ -126,11 +108,7 @@ public class TimeLineView extends View {
 	 *
 	 * @param immediate true if animations must be prevented
 	 */
-	private void update(boolean immediate) {
-		if (!initialized || !Core.getDataCenter().isInvalidated()) {
-			return;
-		}
-
+	void update(boolean immediate) {
 		// updating all blocks
 		for (TimeBlockView view : timeBlockViews) {
 			view.update(immediate);

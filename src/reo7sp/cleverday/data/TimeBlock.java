@@ -11,24 +11,26 @@ import reo7sp.cleverday.utils.DateUtils;
  * Created by reo7sp on 8/1/13 at 1:56 PM
  */
 public class TimeBlock implements TimeConstants {
-	private final int id;
-	private String title;
-	private long start;
-	private long end;
-	private int color = SimpleColor.getRandomColor();
-	private boolean reminder;
-	private String notes;
-	private long googleSyncID = -1;
-	private ModifyType modifyType = ModifyType.ADD;
+	public static final int ID_VALUE_ID = 0;
+	public static final int TITLE_VALUE_ID = 1;
+	public static final int START_VALUE_ID = 2;
+	public static final int END_VALUE_ID = 3;
+	public static final int COLOR_VALUE_ID = 4;
+	public static final int REMINDER_VALUE_ID = 5;
+	public static final int NOTES_VALUE_ID = 6;
+	public static final int GOOGLE_SYNC_ID_VALUE_ID = 7;
+	private final LongValue id;
+	private final StringValue title = new StringValue(this);
+	private final LongValue start = new LongValue(this);
+	private final LongValue end = new LongValue(this);
+	private final IntValue color = new IntValue(this, SimpleColor.getRandomColor());
+	private final BooleanValue reminder = new BooleanValue(this);
+	private final StringValue notes = new StringValue(this);
+	private final LongValue googleSyncID = new LongValue(this, -1);
 
-	public TimeBlock() {
-		this(Core.getRandom().nextInt());
-	}
-
-	TimeBlock(int id) {
-		this.id = id;
+	TimeBlock(long id) {
+		this.id = new LongValue(this, id);
 		setBounds(System.currentTimeMillis(), System.currentTimeMillis() + HOUR, false);
-		DataCenter.getInstance().invalidate();
 	}
 
 	@Override
@@ -47,11 +49,7 @@ public class TimeBlock implements TimeConstants {
 
 	@Override
 	public int hashCode() {
-		int result = id;
-		result = 31 * result + (title != null ? title.hashCode() : 0);
-		result = 31 * result + (int) (start ^ (start >>> 32));
-		result = 31 * result + (int) (end ^ (end >>> 32));
-		return result;
+		return id.hashCode();
 	}
 
 	@Override
@@ -62,36 +60,33 @@ public class TimeBlock implements TimeConstants {
 	/**
 	 * @return the id of this time block
 	 */
-	public int getID() {
-		return id;
+	public long getID() {
+		return id.getValue();
 	}
 
 	/**
 	 * @return the title. Can return null
 	 */
 	public String getTitle() {
-		return title;
+		return title.getValue();
 	}
 
 	/**
 	 * @param title title to set
 	 */
 	public void setTitle(String title) {
-		if (title == null) {
-			this.title = null;
-		} else if (title.isEmpty() || title.equals(Core.getContext().getResources().getString(R.string.untitled_block))) {
-			this.title = null;
+		if (title == null || title.isEmpty() || title.equals(Core.getContext().getResources().getString(R.string.untitled_block))) {
+			this.title.setValue(null);
 		} else {
-			this.title = title.trim();
+			this.title.setValue(title.trim());
 		}
-		markToUpdate();
 	}
 
 	/**
 	 * @return the title which can't be null
 	 */
 	public String getHumanTitle() {
-		return title == null ? Core.getContext().getResources().getString(R.string.untitled_block) : title;
+		return title.getValue() == null ? Core.getContext().getResources().getString(R.string.untitled_block) : title.getValue();
 	}
 
 	/**
@@ -115,15 +110,15 @@ public class TimeBlock implements TimeConstants {
 
 	private void repairBounds() {
 		// position
-		if (start > end) {
-			start = end - -getDuration();
+		if (start.getValue() > end.getValue()) {
+			start.setValue(end.getValue() - -getDuration());
 		}
 
 		// size
 		if (getDuration() < HALF_OF_HOUR) {
-			end = start + HALF_OF_HOUR;
+			end.setValue(start.getValue() + HALF_OF_HOUR);
 		} else if (getDuration() > DAY - QUARTER_OF_HOUR) {
-			end = start + (DAY - QUARTER_OF_HOUR);
+			end.setValue(start.getValue() + (DAY - QUARTER_OF_HOUR));
 		}
 
 		// different days
@@ -147,15 +142,14 @@ public class TimeBlock implements TimeConstants {
 			nextStart = DateUtils.getUtcTime(nextStart);
 			nextEnd = DateUtils.getUtcTime(nextEnd);
 		}
-		if (nextStart == this.start && nextEnd == this.end) {
+		if (nextStart == this.start.getValue() && nextEnd == this.end.getValue()) {
 			return;
 		}
 
-		this.start = nextStart;
-		this.end = nextEnd;
+		this.start.setValue(nextStart);
+		this.end.setValue(nextEnd);
 
 		repairBounds();
-		markToUpdate();
 	}
 
 	/**
@@ -169,25 +163,24 @@ public class TimeBlock implements TimeConstants {
 		if (!utc) {
 			next = DateUtils.getUtcTime(next);
 		}
-		if (next == (startTime ? start : end)) {
+		if (next == (startTime ? start.getValue() : end.getValue())) {
 			return;
 		}
 
 		if (startTime) {
-			start = next;
+			start.setValue(next);
 		} else {
-			end = next;
+			end.setValue(next);
 		}
 
 		repairBounds();
-		markToUpdate();
 	}
 
 	/**
 	 * @return start time in UTC
 	 */
 	public long getUtcStart() {
-		return start;
+		return start.getValue();
 	}
 
 	/**
@@ -201,7 +194,7 @@ public class TimeBlock implements TimeConstants {
 	 * @return start time in local time
 	 */
 	public long getStart() {
-		return DateUtils.getLocalTime(start);
+		return DateUtils.getLocalTime(start.getValue());
 	}
 
 	/**
@@ -215,7 +208,7 @@ public class TimeBlock implements TimeConstants {
 	 * @return end time in utc
 	 */
 	public long getUtcEnd() {
-		return end;
+		return end.getValue();
 	}
 
 	/**
@@ -229,7 +222,7 @@ public class TimeBlock implements TimeConstants {
 	 * @return end time in local time
 	 */
 	public long getEnd() {
-		return DateUtils.getLocalTime(end);
+		return DateUtils.getLocalTime(end.getValue());
 	}
 
 	/**
@@ -243,127 +236,102 @@ public class TimeBlock implements TimeConstants {
 	 * @return the duration in milliseconds
 	 */
 	public long getDuration() {
-		return end - start;
+		return end.getValue() - start.getValue();
 	}
 
 	/**
 	 * @return the color
 	 */
 	public int getColor() {
-		return color;
+		return color.getValue();
 	}
 
 	/**
 	 * @param color color to set. If color isn't one of {@link reo7sp.cleverday.ui.colors.SimpleColor}, time block color will be one of {@link reo7sp.cleverday.ui.colors.SimpleColor} colors
 	 */
 	public void setColor(int color) {
-		if (this.color == color) {
+		if (this.color.getValue() == color) {
 			return;
 		}
 		if (SimpleColor.contains(color)) {
-			this.color = color;
+			this.color.setValue(color);
 		} else {
-			this.color = SimpleColor.getRandomColor();
+			this.color.setValue(SimpleColor.getRandomColor());
 		}
-		markToUpdate();
 	}
 
 	/**
 	 * @return true if time block has reminder
 	 */
 	public boolean hasReminder() {
-		return reminder;
+		return reminder.getValue();
 	}
 
 	/**
 	 * @param reminder if true, time block will have reminder
 	 */
 	public void setReminder(boolean reminder) {
-		if (this.reminder == reminder) {
+		if (this.reminder.getValue() == reminder) {
 			return;
 		}
-		this.reminder = reminder;
-		markToUpdate();
+		this.reminder.setValue(reminder);
 	}
 
 	/**
 	 * @return the notes. Can return null
 	 */
 	public String getNotes() {
-		return notes;
+		return notes.getValue();
 	}
 
 	/**
 	 * @param notes notes to set
 	 */
 	public void setNotes(String notes) {
-		if (notes == null) {
-			this.notes = null;
-		} else if (notes.isEmpty()) {
-			this.notes = null;
+		if (notes == null || notes.isEmpty()) {
+			this.notes.setValue(null);
 		} else {
-			this.notes = notes.trim();
+			this.notes.setValue(notes.trim());
 		}
-		markToUpdate();
 	}
 
 	/**
 	 * @return the id of event in google calendar
 	 */
 	public long getGoogleSyncID() {
-		return googleSyncID;
+		return googleSyncID.getValue();
 	}
 
 	/**
 	 * @param googleSyncID google calendar event id to set
 	 */
 	public void setGoogleSyncID(long googleSyncID) {
-		if (this.googleSyncID == googleSyncID) {
+		if (this.googleSyncID.getValue() == googleSyncID) {
 			return;
 		}
-		this.googleSyncID = googleSyncID;
-		markToUpdate();
+		this.googleSyncID.setValue(googleSyncID);
 	}
 
 	/**
-	 * @return why this block is modified. If block is not modified, it will return null
-	 */
-	public ModifyType getModifyType() {
-		return modifyType;
-	}
-
-	/**
-	 * Clears modify type variable
+	 * Notifies all variables that they has been saved
 	 */
 	void setSaved() {
-		modifyType = null;
+		title.setSaved();
+		start.setSaved();
+		end.setSaved();
+		color.setSaved();
+		reminder.setSaved();
+		notes.setSaved();
+		googleSyncID.setSaved();
 	}
 
 	/**
-	 * Sets add modify type variable
+	 * Returns array which shows what was changed
+	 *
+	 * @return array which shows what was changed
 	 */
-	void markToAdd() {
-		modifyType = ModifyType.ADD;
-		DataCenter.getInstance().invalidate();
-	}
-
-	/**
-	 * Sets update modify type variable
-	 */
-	void markToUpdate() {
-		if (modifyType == ModifyType.ADD || modifyType == ModifyType.REMOVE) {
-			return;
-		}
-		modifyType = ModifyType.UPDATE;
-		DataCenter.getInstance().invalidate();
-	}
-
-	/**
-	 * Sets remove modify type variable
-	 */
-	void markToRemove() {
-		modifyType = ModifyType.REMOVE;
-		DataCenter.getInstance().invalidate();
+	boolean[] whatWasChanged() {
+		return new boolean[] {false, title.isChanged(), start.isChanged(), end.isChanged(), color.isChanged(), reminder.isChanged(), notes.isChanged(), googleSyncID.isChanged()};
 	}
 
 	/**
@@ -386,7 +354,25 @@ public class TimeBlock implements TimeConstants {
 	 * @param diff milliseconds
 	 */
 	public void move(long diff) {
-		setBounds(start + diff, end + diff, true);
+		setBounds(start.getValue() + diff, end.getValue() + diff, true);
+	}
+
+	/**
+	 * Checks if something was changed and not saved
+	 *
+	 * @return true if something was changed and not saved
+	 */
+	boolean isChanged() {
+		return title.isChanged() || start.isChanged() || end.isChanged() || color.isChanged() || reminder.isChanged() || notes.isChanged() || googleSyncID.isChanged();
+	}
+
+	/**
+	 * Checks if time block is dead
+	 *
+	 * @return true if time block is dead
+	 */
+	boolean isDead() {
+		return !Core.getDataCenter().getTimeBlocks().contains(this);
 	}
 
 	/**
@@ -395,23 +381,14 @@ public class TimeBlock implements TimeConstants {
 	 * @return copy of this time block
 	 */
 	public TimeBlock copy() {
-		TimeBlock block = new TimeBlock(id);
-		block.title = title;
-		block.start = start;
-		block.end = end;
-		block.color = color;
-		block.reminder = reminder;
-		block.notes = notes;
-		block.googleSyncID = googleSyncID;
+		TimeBlock block = new TimeBlock(id.getValue());
+		block.title.setValue(title.getValue());
+		block.start.setValue(start.getValue());
+		block.end.setValue(end.getValue());
+		block.color.setValue(color.getValue());
+		block.reminder.setValue(reminder.getValue());
+		block.notes.setValue(notes.getValue());
+		block.googleSyncID.setValue(googleSyncID.getValue());
 		return block;
-	}
-
-	/**
-	 * Created by reo7sp on 8/1/13 at 2:26 PM
-	 */
-	public static enum ModifyType {
-		ADD,
-		UPDATE,
-		REMOVE,
 	}
 }

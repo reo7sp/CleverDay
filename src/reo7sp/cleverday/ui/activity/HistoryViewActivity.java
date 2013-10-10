@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
-import reo7sp.cleverday.data.HistoryStorage;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.ColorUtils;
@@ -51,7 +50,7 @@ public class HistoryViewActivity extends Activity {
 
 		// fetching completions
 		int i = 0;
-		for (TimeBlock block : HistoryStorage.getHistory()) {
+		for (TimeBlock block : Core.getHistoryStorage().getHistory()) {
 			history.put(i++, block);
 		}
 
@@ -74,7 +73,7 @@ public class HistoryViewActivity extends Activity {
 		historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> list, View view, int pos, long id) {
-				TimeBlock historyBlock = HistoryStorage.getFromHistory(history.get(pos).getTitle());
+				TimeBlock historyBlock = Core.getHistoryStorage().getFromHistory(history.get(pos).getTitle());
 				if (historyBlock == null) {
 					return;
 				}

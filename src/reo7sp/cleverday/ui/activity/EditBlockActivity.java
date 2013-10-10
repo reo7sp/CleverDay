@@ -20,14 +20,14 @@ import android.widget.TextView;
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
-import reo7sp.cleverday.data.HistoryStorage;
+import reo7sp.cleverday.data.DataInvalidateListener;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.Dialogs;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.ColorUtils;
 import reo7sp.cleverday.utils.DateUtils;
 
-public class EditBlockActivity extends Activity {
+public class EditBlockActivity extends Activity implements DataInvalidateListener {
 	private final TextWatcher titleTextWatcher = new TextWatcher() {
 		@Override
 		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -87,7 +87,7 @@ public class EditBlockActivity extends Activity {
 
 		// parsing intent args
 		create = getIntent().getBooleanExtra("create", false);
-		int id = getIntent().getIntExtra("id", -1);
+		long id = getIntent().getLongExtra("id", -1);
 		if (create && id == -1) {
 			block = Core.getDataCenter().newTimeBlock();
 		} else {
@@ -102,6 +102,7 @@ public class EditBlockActivity extends Activity {
 		// other...
 		getActionBar().setTitle(create ? R.string.add_block : R.string.edit_block);
 		setContentView(R.layout.edit_block_activity);
+		Core.getDataCenter().registerDataInvalidateListener(this);
 
 		// finding views
 		titleEdit = (AutoCompleteTextView) findViewById(R.id.title_edit);
@@ -116,7 +117,7 @@ public class EditBlockActivity extends Activity {
 
 		// fetching completions
 		int i = 0;
-		for (TimeBlock block : HistoryStorage.getHistory()) {
+		for (TimeBlock block : Core.getHistoryStorage().getHistory()) {
 			history.put(i++, block);
 		}
 
@@ -132,7 +133,7 @@ public class EditBlockActivity extends Activity {
 		titleEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> list, View view, int pos, long id) {
-				TimeBlock historyBlock = HistoryStorage.getFromHistory(history.get(pos).getTitle());
+				TimeBlock historyBlock = Core.getHistoryStorage().getFromHistory(history.get(pos).getTitle());
 				if (historyBlock == null) {
 					return;
 				}
@@ -218,6 +219,9 @@ public class EditBlockActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+
+		Core.getDataCenter().unregisterDataInvalidateListener(this);
+
 		if (block != null) {
 			// removing listeners
 			titleEdit.removeTextChangedListener(titleTextWatcher);
@@ -270,5 +274,15 @@ public class EditBlockActivity extends Activity {
 		startDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getStart()));
 		endTimeButton.setText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getEnd()));
 		endDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getEnd()));
+	}
+
+	@Override
+	public void onDataInvalidate() {
+		Core.getSyncActionQueue().addAction(new Runnable() {
+			@Override
+			public void run() {
+				updateData();
+			}
+		});
 	}
 }

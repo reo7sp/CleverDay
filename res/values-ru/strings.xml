@@ -82,4 +82,5 @@
 	<string name="edit_fast_text">Планы неожиданно изменились? Просто передвинь всё остальное</string>
 	<string name="history">История</string>
 	<string name="no_history">Вы не создали пока ни одну задачу</string>
+	<string name="syncing">Идет синхронизация…</string>
 </resources>
