@@ -26,10 +26,10 @@ public class SyncQueue implements DBConstants {
 			do {
 				Commit commit = new Commit();
 				commit.id = cursor.getLong(0);
-				commit.changes = new boolean[] {false, cursor.getInt(1) == 0, cursor.getInt(2) == 0, cursor.getInt(3) == 0, cursor.getInt(4) == 0, cursor.getInt(5) == 0, cursor.getInt(6) == 0, cursor.getInt(7) == 0, false};
-				commit.googleSyncID = cursor.getLong(8);
-				commit.dead = cursor.getInt(9) == 0;
-				commit.googleSynced = cursor.getInt(10) == 0;
+				commit.changes = new boolean[] {false, cursor.getInt(1) == 0, cursor.getInt(2) == 0, cursor.getInt(3) == 0, cursor.getInt(4) == 0, cursor.getInt(5) == 0, cursor.getInt(6) == 0, false};
+				commit.googleSyncID = cursor.getLong(7);
+				commit.dead = cursor.getInt(8) == 0;
+				commit.googleSynced = cursor.getInt(9) == 0;
 				addCommit(commit);
 			} while (cursor.moveToNext());
 		}
@@ -113,7 +113,7 @@ public class SyncQueue implements DBConstants {
 		}
 		commits.add(commit);
 
-		if (Core.getGoogleCalendarStorage().getMainCalendar() == null) {
+		if (false && Core.getGoogleCalendarStorage().getMainCalendar() == null) {
 			commit.setSynced(Core.getGoogleCalendarStorage());
 		}
 	}
