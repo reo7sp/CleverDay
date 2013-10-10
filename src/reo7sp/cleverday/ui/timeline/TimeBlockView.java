@@ -163,6 +163,7 @@ public class TimeBlockView {
 	private void repairPosition(boolean immediate) {
 		Core.getSyncActionQueue().removeAction(positionAnimation);
 		if (immediate) {
+			positionAnimation = null;
 			y = generateY();
 		} else {
 			positionAnimation = new PositionAnimation();
@@ -178,6 +179,7 @@ public class TimeBlockView {
 	private void repairSize(boolean immediate) {
 		Core.getSyncActionQueue().removeAction(sizeAnimation);
 		if (immediate) {
+			sizeAnimation = null;
 			height = generateHeight();
 		} else {
 			sizeAnimation = new SizeAnimation();
@@ -271,7 +273,7 @@ public class TimeBlockView {
 	 * @return generated height
 	 */
 	private int generateHeight() {
-		return (int) (block.getDuration() / TimeConstants.HOUR * TimeLineView.STEP);
+		return (int) (block.getDuration() * TimeLineView.STEP / TimeConstants.HOUR);
 	}
 
 	/**

@@ -167,19 +167,13 @@ public class TimeLinesLeader implements DataInvalidateListener {
 	 * @param scrollY scroll y to set
 	 */
 	void setScrollY(int scrollY) {
-		boolean changed = false;
 		this.scrollY = scrollY;
 		if (this.scrollY < 0) {
 			this.scrollY = 0;
 		} else if (this.scrollY > getScrollMax()) {
 			this.scrollY = getScrollMax();
 		}
-		if (this.scrollY != scrollY) {
-			changed = true;
-		}
-		if (changed) {
-			updateScroll();
-		}
+		updateScroll();
 	}
 
 	/**

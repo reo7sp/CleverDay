@@ -266,6 +266,10 @@ public class EditBlockActivity extends Activity implements DataInvalidateListene
 	}
 
 	public void updateData() {
+		if (block == null) {
+			return;
+		}
+
 		getActionBar().setBackgroundDrawable(new ColorDrawable(ColorUtils.darker(block.getColor(), AndroidUtils.isInDarkTheme() ? 0.25f : 0)));
 		invalidateOptionsMenu();
 		titleEdit.setText(block.getTitle());
