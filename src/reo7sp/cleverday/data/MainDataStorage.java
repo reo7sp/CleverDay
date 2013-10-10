@@ -73,11 +73,11 @@ public class MainDataStorage extends LocalDataStorage implements DBConstants {
 		values.put(KEY_NOTES, block.getNotes());
 		values.put(KEY_GOOGLE_SYNC_ID, block.getGoogleSyncID());
 
-		int i = getDB().update(TIME_BLOCKS_TABLE_NAME, values, KEY_ID + " = " + block.getID(), null);
+		getDB().update(TIME_BLOCKS_TABLE_NAME, values, KEY_ID + " = " + block.getID(), null);
 	}
 
 	private void removeFromDB(TimeBlock block) {
-		int i = getDB().delete(TIME_BLOCKS_TABLE_NAME, KEY_ID + "=" + block.getID(), null);
+		getDB().delete(TIME_BLOCKS_TABLE_NAME, KEY_ID + " = " + block.getID(), null);
 	}
 
 	private boolean isInDB(TimeBlock block) {

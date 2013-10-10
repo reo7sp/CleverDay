@@ -30,7 +30,7 @@ public class PostponeActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// parsing intent args
-		int id = getIntent().getIntExtra("id", -1);
+		long id = getIntent().getLongExtra("id", -1);
 		block = Core.getDataCenter().getBlock(id);
 		if (block == null) {
 			finish();

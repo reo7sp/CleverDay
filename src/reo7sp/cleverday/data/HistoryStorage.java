@@ -43,7 +43,7 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 	 * @param title title of the block
 	 * @return block with specified title or null
 	 */
-	public TimeBlock getFromHistory(CharSequence title) {
+	public TimeBlock getFromHistory(String title) {
 		for (TimeBlock block : timeBlocks) {
 			if (block.getTitle().equals(title)) {
 				return block;
@@ -56,33 +56,21 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 	 * @param block block to add
 	 */
 	public void addToHistory(TimeBlock block) {
-		if (block.getTitle() == null) {
-			return;
+		if (block.getTitle() != null) {
+			timeBlocks.remove(getBlockWithTitle(block.getTitle()));
+			timeBlocks.add(block);
+			addToDB(block);
 		}
-		for (Iterator<TimeBlock> iterator = timeBlocks.iterator(); iterator.hasNext(); ) {
-			TimeBlock block1 = iterator.next();
-			if (block1.getTitle().equals(block.getTitle())) {
-				iterator.remove();
-				break;
-			}
-		}
-		timeBlocks.add(block);
-	}
-
-	/**
-	 * @param block block to remove
-	 */
-	public void removeFromHistory(TimeBlock block) {
-		timeBlocks.remove(block);
 	}
 
 	/**
 	 * @param title title of the block
 	 */
-	public void removeFromHistory(CharSequence title) {
+	public void removeFromHistory(String title) {
 		for (TimeBlock block : timeBlocks) {
 			if (block.getTitle().equals(title)) {
 				timeBlocks.remove(block);
+				removeFromDB(block.getTitle());
 			}
 		}
 	}
@@ -100,6 +88,7 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 				block.setColor(cursor.getInt(4));
 				block.setReminder(cursor.getInt(5) != 0);
 				block.setNotes(cursor.getString(6));
+
 				addToHistory(block);
 			} while (cursor.moveToNext());
 		}
@@ -108,15 +97,53 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 
 	@Override
 	void save() {
+		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
+			if (!hasBlockWithID(block.getID())) {
+				addToHistory(block);
+			}
+		}
+
 		for (Iterator<TimeBlock> iterator = timeBlocks.iterator(); iterator.hasNext(); ) {
 			TimeBlock block = iterator.next();
+
 			if (block.getTitle() == null) {
 				iterator.remove();
-				removeFromDB(block.getID());
-				continue;
+				removeFromDB(block.getTitle());
+			} else {
+				TimeBlock realBlock = Core.getDataCenter().getBlock(block.getID());
+				if (realBlock != null) {
+					block.setTitle(realBlock.getTitle());
+					block.setBounds(realBlock.getUtcStart(), realBlock.getUtcEnd(), true);
+					block.setColor(realBlock.getColor());
+					block.setReminder(realBlock.hasReminder());
+					block.setNotes(realBlock.getNotes());
+
+					updateInDB(block);
+				}
 			}
-			updateInDB(block);
 		}
+	}
+
+	private TimeBlock getBlockWithTitle(String title) {
+		if (title == null) {
+			return null;
+		}
+
+		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
+			if (block.getTitle() != null && block.getTitle().equalsIgnoreCase(title)) {
+				return block;
+			}
+		}
+		return null;
+	}
+
+	private boolean hasBlockWithID(long id) {
+		for (TimeBlock block : timeBlocks) {
+			if (block.getID() == id) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -125,17 +152,12 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 	}
 
 	private void addToDB(TimeBlock block) {
-		if (block.getTitle() == null) { // if time block hasn't got title
+		if (block.getTitle() == null) {
 			return;
 		}
 
-		if (getDBSize() > 100) { // if history is too big
-			getDB().rawQuery("DROP TABLE " + HISTORY_TABLE_NAME, null);
-			createTableInDB();
-		}
-
 		// finding similar block in history and removing it
-		removeFromDB(getBlockIDFromDB(block.getTitle()));
+		removeFromDB(block.getTitle());
 
 		// inserting block
 		ContentValues values = new ContentValues();
@@ -151,6 +173,10 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 	}
 
 	private void updateInDB(TimeBlock block) {
+		if (block.getTitle() == null) {
+			return;
+		}
+
 		if (!isInDB(block)) {
 			addToDB(block);
 			return;
@@ -165,6 +191,10 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 		values.put(KEY_NOTES, block.getNotes());
 
 		getDB().update(HISTORY_TABLE_NAME, values, KEY_ID + " = " + block.getID(), null);
+	}
+
+	private void removeFromDB(String title) {
+		removeFromDB(getBlockIDFromDB(title));
 	}
 
 	private void removeFromDB(long id) {
@@ -188,14 +218,6 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 		int count = cursor.getCount();
 		cursor.close();
 		return count > 0;
-	}
-
-	private int getDBSize() {
-		Cursor cursor = getDB().rawQuery("SELECT * FROM " + HISTORY_TABLE_NAME, null);
-		int count = cursor.getCount();
-		cursor.close();
-
-		return count;
 	}
 
 	private void createTableInDB() {

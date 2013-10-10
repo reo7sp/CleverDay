@@ -19,7 +19,9 @@ public abstract class AbstractValue {
 
 	protected void setChanged() {
 		changed = true;
-		Core.getDataCenter().getSyncQueue().newCommit(block);
+		if (!block.isDead()) {
+			Core.getDataCenter().getSyncQueue().newCommit(block);
+		}
 	}
 
 	public void setSaved() {
