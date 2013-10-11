@@ -58,8 +58,8 @@
 	<string name="hours4">4 hours</string>
 	<string name="hour1minutes30">Hour and a half</string>
 	<string name="event_color">Event color in Google Calendar</string>
-	<string name="calendar_event_color_on_summary">Color of calendar in Google Calendar</string>
-	<string name="calendar_event_color_off_summary">Color of block in CleverDay</string>
+	<string name="calendar_event_color_on_summary">Color of Google Calendar\'s calendar</string>
+	<string name="calendar_event_color_off_summary">Color of CleverDay\'s block</string>
 	<string name="use_mobile_network">Use mobile network</string>
 	<string name="use_only_wifi">Only Wi-Fi</string>
 	<string name="use_mobile_network_and_wifi">Mobile network and Wi-Fi</string>

@@ -56,8 +56,8 @@
 	<string name="hours4">4 часа</string>
 	<string name="hour1minutes30">Полтора часа</string>
 	<string name="event_color">Цвет события в Google Calendar</string>
-	<string name="calendar_event_color_on_summary">Цвет календаря в Google Calendar</string>
-	<string name="calendar_event_color_off_summary">Цвет блока в CleverDay</string>
+	<string name="calendar_event_color_on_summary">Цвет календаря Google Calendar</string>
+	<string name="calendar_event_color_off_summary">Цвет блока CleverDay</string>
 	<string name="use_mobile_network">Использовать мобильную сеть</string>
 	<string name="use_only_wifi">Только Wi-Fi</string>
 	<string name="use_mobile_network_and_wifi">Мобильная сеть и Wi-Fi</string>
