@@ -29,11 +29,6 @@ public class WelcomeActivity extends Activity {
 		setContentView(R.layout.welcome_activity);
 		getActionBar().hide();
 
-		// saving visit
-		SharedPreferences.Editor editor = Core.getPreferences().edit();
-		editor.putBoolean("pref_welcome", true);
-		editor.commit();
-
 		// finding views
 		Button loginButton = (Button) findViewById(R.id.login_button);
 		Button skipButton = (Button) findViewById(R.id.skip_button);
@@ -65,6 +60,10 @@ public class WelcomeActivity extends Activity {
 		block.setTitle(getResources().getString(R.string.press_me));
 		block.setNotes(getResources().getString(R.string.and_drag));
 		block.setColor(SimpleColor.RED);
+
+		SharedPreferences.Editor editor = Core.getPreferences().edit();
+		editor.putBoolean("pref_welcome", true);
+		editor.commit();
 
 		finish();
 	}
