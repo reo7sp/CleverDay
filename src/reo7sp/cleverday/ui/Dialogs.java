@@ -198,18 +198,20 @@ public class Dialogs {
 		builder.setTitle(R.string.google_calendar);
 
 		// content
-		CharSequence[] calendars = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size()];
+		final GoogleCalendar[] calendars = new GoogleCalendar[Core.getGoogleCalendarStorage().getCalendars().size()];
+		CharSequence[] calendarsNames = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size()];
 		int i = 0;
 		for (GoogleCalendar calendar : Core.getGoogleCalendarStorage().getCalendars()) {
-			calendars[i] = calendar.getName();
+			calendars[i] = calendar;
+			calendarsNames[i] = calendar.getName();
 			i++;
 		}
 
-		builder.setItems(calendars, new DialogInterface.OnClickListener() {
+		builder.setItems(calendarsNames, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				SharedPreferences.Editor editor = Core.getPreferences().edit();
-				editor.putString("pref_google_calendar", "" + which);
+				editor.putString("pref_google_calendar", "" + calendars[which].getID());
 				editor.commit();
 
 				Core.getGoogleCalendarStorage().updateSettings();

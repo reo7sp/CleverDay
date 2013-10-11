@@ -40,12 +40,14 @@
 				android:title="@string/google_calendar" />
 
 		<CheckBoxPreference
+				android:defaultValue="true"
 				android:key="pref_modify_google"
 				android:summaryOn="@string/modify_google_on_summary"
 				android:summaryOff="@string/modify_google_off_summary"
 				android:title="@string/modify_google" />
 
 		<CheckBoxPreference
+				android:defaultValue="true"
 				android:key="pref_receive_from_google"
 				android:summaryOn="@string/receive_from_google_on_summary"
 				android:summaryOff="@string/receive_from_google_off_summary"

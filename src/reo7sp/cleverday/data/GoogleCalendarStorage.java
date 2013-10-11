@@ -95,6 +95,10 @@ public class GoogleCalendarStorage extends ExternalDataStorage {
 					}
 				}
 			}
+
+			if (mainCalendar != null) {
+				Core.getDataCenter().syncData();
+			}
 		}
 	}
 
