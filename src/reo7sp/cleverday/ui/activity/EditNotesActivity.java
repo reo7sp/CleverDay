@@ -8,11 +8,10 @@ import android.widget.TextView;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
-import reo7sp.cleverday.data.DataInvalidateListener;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.utils.AndroidUtils;
 
-public class EditNotesActivity extends Activity implements DataInvalidateListener {
+public class EditNotesActivity extends Activity {
 	private final TextWatcher notesTextWatcher = new TextWatcher() {
 		@Override
 		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -41,7 +40,6 @@ public class EditNotesActivity extends Activity implements DataInvalidateListene
 		// other...
 		AndroidUtils.updateTheme(this);
 		super.onCreate(savedInstanceState);
-		Core.getDataCenter().registerDataInvalidateListener(this);
 
 		// parsing intent args
 		long id = getIntent().getLongExtra("id", -1);
@@ -65,22 +63,10 @@ public class EditNotesActivity extends Activity implements DataInvalidateListene
 	protected void onDestroy() {
 		super.onDestroy();
 
-		Core.getDataCenter().unregisterDataInvalidateListener(this);
-
 		if (block != null) {
-			// removing listeners
+			block.setNotes(notesEdit.getText().toString());
 			notesEdit.removeTextChangedListener(notesTextWatcher);
 		}
 		block = null;
-	}
-
-	@Override
-	public void onDataInvalidate() {
-		Core.getSyncActionQueue().addAction(new Runnable() {
-			@Override
-			public void run() {
-				notesEdit.setText(block.getNotes());
-			}
-		});
 	}
 }

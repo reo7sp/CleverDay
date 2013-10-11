@@ -100,13 +100,6 @@ public class Core {
 	}
 
 	/**
-	 * @return true if core has been ever built
-	 */
-	public static boolean isBuilt() {
-		return isBuilt;
-	}
-
-	/**
 	 * @return the paint
 	 */
 	public static Paint getPaint() {
@@ -228,7 +221,12 @@ public class Core {
 				}
 
 				// invalidating net status
-				NetWatcher.invalidate(context);
+				Core.getSyncActionQueue().addAction(new Runnable() {
+					@Override
+					public void run() {
+						NetWatcher.invalidate(context);
+					}
+				});
 
 				// handling day change
 				if (!DateUtils.isInOneDay(System.currentTimeMillis(), Core.getCreationTime())) {

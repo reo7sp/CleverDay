@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import reo7sp.cleverday.data.DataCenter;
-
 /**
  * Created by reo7sp on 8/27/13 at 6:50 PM
  */
@@ -29,7 +27,7 @@ public class NetWatcher extends BroadcastReceiver {
 		}
 		Core.setNetOn(true);
 
-		DataCenter.getInstance().syncData();
+		Core.getDataCenter().syncData();
 	}
 
 	private static void onNetOff() {

@@ -43,7 +43,7 @@ public class DataCenter {
 	 * @return the instance
 	 */
 	public static DataCenter getInstance() {
-		if (instance == null && Core.isBuilt()) {
+		if (instance == null) {
 			synchronized (DataCenter.class) {
 				if (instance == null) {
 					instance = new DataCenter();

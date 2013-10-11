@@ -20,7 +20,6 @@ import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
-import reo7sp.cleverday.data.DataCenter;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.log.Log;
 import reo7sp.cleverday.ui.TimePreference;
@@ -87,12 +86,6 @@ public class MainActivity extends FragmentActivity {
 				}
 			}
 		});
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		DataCenter.getInstance().syncData();
 	}
 
 	@Override

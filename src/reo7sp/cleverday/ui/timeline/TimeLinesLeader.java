@@ -27,7 +27,7 @@ public class TimeLinesLeader implements DataInvalidateListener {
 	 * @return the instance
 	 */
 	public static TimeLinesLeader getInstance() {
-		if (instance == null && Core.isBuilt()) {
+		if (instance == null) {
 			instance = new TimeLinesLeader();
 		}
 		return instance;

@@ -20,14 +20,13 @@ import android.widget.TextView;
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
-import reo7sp.cleverday.data.DataInvalidateListener;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.Dialogs;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.ColorUtils;
 import reo7sp.cleverday.utils.DateUtils;
 
-public class EditBlockActivity extends Activity implements DataInvalidateListener {
+public class EditBlockActivity extends Activity {
 	private final TextWatcher titleTextWatcher = new TextWatcher() {
 		@Override
 		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -102,7 +101,6 @@ public class EditBlockActivity extends Activity implements DataInvalidateListene
 		// other...
 		getActionBar().setTitle(create ? R.string.add_block : R.string.edit_block);
 		setContentView(R.layout.edit_block_activity);
-		Core.getDataCenter().registerDataInvalidateListener(this);
 
 		// finding views
 		titleEdit = (AutoCompleteTextView) findViewById(R.id.title_edit);
@@ -220,10 +218,7 @@ public class EditBlockActivity extends Activity implements DataInvalidateListene
 	protected void onDestroy() {
 		super.onDestroy();
 
-		Core.getDataCenter().unregisterDataInvalidateListener(this);
-
 		if (block != null) {
-			// removing listeners
 			titleEdit.removeTextChangedListener(titleTextWatcher);
 			notesEdit.setOnClickListener(null);
 			startTimeButton.setOnClickListener(null);
@@ -278,15 +273,5 @@ public class EditBlockActivity extends Activity implements DataInvalidateListene
 		startDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getStart()));
 		endTimeButton.setText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getEnd()));
 		endDateButton.setText(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH_YEAR, block.getEnd()));
-	}
-
-	@Override
-	public void onDataInvalidate() {
-		Core.getSyncActionQueue().addAction(new Runnable() {
-			@Override
-			public void run() {
-				updateData();
-			}
-		});
 	}
 }

@@ -18,11 +18,16 @@ import reo7sp.cleverday.ui.activity.MainActivity;
  */
 public class StandardWidget extends AppWidgetProvider implements DataInvalidateListener {
 	private static int[] appWidgetIds;
+	private PendingIntent appOpenIntent;
 
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
 		Core.getDataCenter().registerDataInvalidateListener(this);
+
+		Intent intent = new Intent(context, MainActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+		appOpenIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
 	@Override
@@ -37,16 +42,10 @@ public class StandardWidget extends AppWidgetProvider implements DataInvalidateL
 		StandardWidget.appWidgetIds = appWidgetIds;
 
 		// setting listeners
-		if (!Core.isBuilt()) {
-			Intent appOpenIntent = new Intent(context, MainActivity.class);
-			appOpenIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-			remoteViews.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(context, 0, appOpenIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-		}
+		remoteViews.setOnClickPendingIntent(R.id.root, appOpenIntent);
 
 		// building core
-		if (!Core.isBuilt()) {
-			Core.startBuilding().setContext(context).build();
-		}
+		Core.startBuilding().setContext(context).build();
 
 		// getting time blocks
 		long now = System.currentTimeMillis();
