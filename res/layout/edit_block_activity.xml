@@ -16,7 +16,9 @@
 			android:layout_alignParentTop="true"
 			android:layout_toRightOf="@+id/history_button"
 			android:ems="10"
-			android:hint="@string/title" android:layout_toLeftOf="@+id/history_button" />
+			android:hint="@string/title"
+			android:singleLine="true"
+			android:layout_toLeftOf="@+id/history_button" />
 
 	<ImageButton
 			android:id="@+id/history_button"
