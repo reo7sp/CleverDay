@@ -80,6 +80,10 @@ public class NotificationService extends Service implements DataInvalidateListen
 	}
 
 	private void findNextTimeBlocks() {
+		current = null;
+		next = null;
+		later = null;
+
 		long now = System.currentTimeMillis();
 		int i = 0;
 		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {

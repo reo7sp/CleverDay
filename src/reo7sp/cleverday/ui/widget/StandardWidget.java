@@ -3,6 +3,7 @@ package reo7sp.cleverday.ui.widget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
@@ -17,17 +18,14 @@ import reo7sp.cleverday.ui.activity.MainActivity;
  * Created by reo7sp on 9/6/13 at 6:11 PM
  */
 public class StandardWidget extends AppWidgetProvider implements DataInvalidateListener {
-	private static int[] appWidgetIds;
-	private PendingIntent appOpenIntent;
+	private int[] appWidgetIds;
+	private TimeBlock current, next, later;
 
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
 		Core.getDataCenter().registerDataInvalidateListener(this);
-
-		Intent intent = new Intent(context, MainActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		appOpenIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		appWidgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, getClass()));
 	}
 
 	@Override
@@ -39,36 +37,18 @@ public class StandardWidget extends AppWidgetProvider implements DataInvalidateL
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.standard_widget);
-		StandardWidget.appWidgetIds = appWidgetIds;
+		this.appWidgetIds = appWidgetIds;
 
 		// setting listeners
-		remoteViews.setOnClickPendingIntent(R.id.root, appOpenIntent);
+		Intent appOpenIntent = new Intent(context, MainActivity.class);
+		appOpenIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+		remoteViews.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(context, 0, appOpenIntent, PendingIntent.FLAG_UPDATE_CURRENT));
 
 		// building core
 		Core.startBuilding().setContext(context).build();
 
-		// getting time blocks
-		long now = System.currentTimeMillis();
-		TimeBlock[] firstTimeBlocks = new TimeBlock[3];
-		int i = 0;
-		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
-			if (i < firstTimeBlocks.length) {
-				if (block.getEnd() < now) {
-					continue;
-				}
-				if (!(block.getStart() < now && block.getEnd() > now) && i == 0) {
-					i++;
-				}
-				firstTimeBlocks[i++] = block;
-			} else {
-				break;
-			}
-		}
-		TimeBlock current = firstTimeBlocks[0];
-		TimeBlock next = firstTimeBlocks[1];
-		TimeBlock later = firstTimeBlocks[2];
-
 		// updating data
+		findNextTimeBlocks();
 		if (current == null) {
 			if (next == null) {
 				remoteViews.setTextViewText(R.id.first_text, context.getResources().getString(R.string.no_plan));
@@ -90,6 +70,36 @@ public class StandardWidget extends AppWidgetProvider implements DataInvalidateL
 			}
 		}
 		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
+	}
+
+	private void findNextTimeBlocks() {
+		current = null;
+		next = null;
+		later = null;
+
+		long now = System.currentTimeMillis();
+		int i = 0;
+		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
+			if (i >= 3) {
+				break;
+			} else if (block.getEnd() < now) {
+				continue;
+			} else if (i == 0 && !(block.getStart() < now && block.getEnd() > now)) {
+				i++;
+			}
+
+			switch (i) {
+				case 0:
+					current = block;
+					break;
+				case 1:
+					next = block;
+					break;
+				case 2:
+					later = block;
+					break;
+			}
+		}
 	}
 
 	@Override

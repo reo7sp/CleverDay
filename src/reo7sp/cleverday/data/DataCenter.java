@@ -92,6 +92,7 @@ public class DataCenter {
 		timeBlocks.add(block);
 		syncQueue.newCommit(block);
 		Core.getHistoryStorage().addToHistory(block);
+		notifyDataInvalidateListeners();
 		Log.i("Data", "Time block \"" + block.getTitle() + "\" with id " + block.getID() + " added! Collection size: " + timeBlocks.size());
 
 		if (Core.getTimeLinesLeader() != null) {
@@ -115,6 +116,7 @@ public class DataCenter {
 		timeBlocks.remove(block);
 		dataStorageLeader.remove(block);
 		syncQueue.newCommit(block);
+		notifyDataInvalidateListeners();
 		Log.i("Data", "Time block \"" + block.getTitle() + "\" with id " + block.getID() + " removed! Collection size: " + timeBlocks.size());
 
 		if (Core.getTimeLinesLeader() != null) {
@@ -142,6 +144,12 @@ public class DataCenter {
 		}.start();
 	}
 
+	private void notifyDataInvalidateListeners() {
+		for (DataInvalidateListener listener : invalidateListeners) {
+			listener.onDataInvalidate();
+		}
+	}
+
 	private void startThread() {
 		new Thread("DataCenter") {
 			@Override
@@ -156,13 +164,8 @@ public class DataCenter {
 							if (isDataChanged()) {
 								dataStorageLeader.save();
 								syncQueue.save();
-
 								Collections.sort(timeBlocks, timeBlockComparator);
-
-								for (DataInvalidateListener listener : invalidateListeners) {
-									listener.onDataInvalidate();
-								}
-
+								notifyDataInvalidateListeners();
 								saveAll();
 							}
 
@@ -182,6 +185,7 @@ public class DataCenter {
 		Log.i("Data", "Loading data");
 		dataStorageLeader.load();
 		saveAll();
+		notifyDataInvalidateListeners();
 		Log.i("Data", "Loaded!");
 	}
 
