@@ -63,18 +63,6 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 		}
 	}
 
-	/**
-	 * @param title title of the block
-	 */
-	public void removeFromHistory(String title) {
-		for (TimeBlock block : timeBlocks) {
-			if (block.getTitle().equals(title)) {
-				timeBlocks.remove(block);
-				removeFromDB(block.getTitle());
-			}
-		}
-	}
-
 	@Override
 	void load() {
 		createTableInDB();
