@@ -73,14 +73,11 @@
 	<string name="submit_help">Отправить баг-репорт/функцию/перевод</string>
 	<string name="on_google_play">На Google Play</string>
 	<string name="welcome">Добро пожаловать</string>
-	<string name="hello">Привет!</string>
-	<string name="hello_text">Привет! Это CleverDay - временной органайзер, позволяющий быстро и удобно планировать ваш день</string>
-	<string name="ok">OK</string>
-	<string name="plan_fast">Планируй быстро</string>
-	<string name="plan_fast_text">Есть повторяющиеся задачи? Вы можете добавлять их в следующие дни только в двумя нажатиями</string>
-	<string name="edit_fast">Редактируй быстро</string>
-	<string name="edit_fast_text">Планы неожиданно изменились? Просто передвинь всё остальное</string>
 	<string name="history">История</string>
 	<string name="no_history">Вы не создали пока ни одну задачу</string>
 	<string name="syncing">Идет синхронизация…</string>
+	<string name="skip">Пропустить</string>
+	<string name="login">Войти</string>
+	<string name="press_me">Нажми на меня!</string>
+	<string name="and_drag">И перетащи!</string>
 </resources>

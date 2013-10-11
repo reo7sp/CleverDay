@@ -75,14 +75,11 @@
 	<string name="submit_help">Submit bug/feature/translation</string>
 	<string name="on_google_play">On Google Play</string>
 	<string name="welcome">Welcome</string>
-	<string name="hello">Hello!</string>
-	<string name="hello_text">Hi! This is CleverDay, time organizer in which you can plan your day fast and comfortably</string>
-	<string name="ok">OK</string>
-	<string name="plan_fast">Plan fast</string>
-	<string name="plan_fast_text">Do you have some repeating tasks? You can add them to next days just in two clicks</string>
-	<string name="edit_fast">Edit fast</string>
-	<string name="edit_fast_text">Have plans suddenly been changed? Just move remaining</string>
 	<string name="history">History</string>
 	<string name="no_history">You haven\'t created any task yet</string>
 	<string name="syncing">Syncing…</string>
+	<string name="skip">Skip</string>
+	<string name="login">Login</string>
+	<string name="press_me">Press me!</string>
+	<string name="and_drag">And drag!</string>
 </resources>

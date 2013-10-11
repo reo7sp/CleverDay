@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import reo7sp.cleverday.Core;
 import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
+import reo7sp.cleverday.data.GoogleCalendar;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
 import reo7sp.cleverday.ui.colors.SimpleColor;
@@ -187,5 +189,44 @@ public class Dialogs {
 				setContentView(gridView);
 			}
 		};
+	}
+
+	public static Dialog createCalendarChooseDialog(final Context context) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+		// title
+		builder.setTitle(R.string.google_calendar);
+
+		// content
+		CharSequence[] calendars = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size()];
+		int i = 0;
+		for (GoogleCalendar calendar : Core.getGoogleCalendarStorage().getCalendars()) {
+			calendars[i] = calendar.getName();
+			i++;
+		}
+
+		builder.setItems(calendars, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				SharedPreferences.Editor editor = Core.getPreferences().edit();
+				editor.putString("pref_google_calendar", "" + which);
+				editor.commit();
+
+				Core.getGoogleCalendarStorage().updateSettings();
+
+				dialog.cancel();
+			}
+		});
+
+		// buttons
+		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+
+		// returning dialog instance, but not showing it
+		return builder.create();
 	}
 }
