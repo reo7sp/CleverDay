@@ -33,7 +33,6 @@ public class DataCenter {
 
 	private DataCenter() {
 		startThread();
-		startSyncThread();
 	}
 
 	/**
@@ -127,21 +126,6 @@ public class DataCenter {
 				}
 			});
 		}
-	}
-
-	private void startSyncThread() {
-		new Thread("DataCenter-AutoSync") {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(30000);
-					if (Core.isNetOn() && Core.getMainActivity() != null) {
-						syncData();
-					}
-				} catch (InterruptedException ignored) {
-				}
-			}
-		}.start();
 	}
 
 	private void notifyDataInvalidateListeners() {
