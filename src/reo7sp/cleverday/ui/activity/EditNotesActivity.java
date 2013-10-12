@@ -1,6 +1,7 @@
 package reo7sp.cleverday.ui.activity;
 
 import android.app.Activity;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +11,7 @@ import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.utils.AndroidUtils;
+import reo7sp.cleverday.utils.ColorUtils;
 
 public class EditNotesActivity extends Activity {
 	private final TextWatcher notesTextWatcher = new TextWatcher() {
@@ -42,7 +44,7 @@ public class EditNotesActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// parsing intent args
-		int id = getIntent().getIntExtra("id", -1);
+		long id = getIntent().getLongExtra("id", -1);
 		block = Core.getDataCenter().getBlock(id);
 		if (block == null) {
 			finish();
@@ -50,6 +52,7 @@ public class EditNotesActivity extends Activity {
 		}
 
 		// other...
+		getActionBar().setBackgroundDrawable(new ColorDrawable(ColorUtils.darker(block.getColor(), AndroidUtils.isInDarkTheme() ? 0.25f : 0)));
 		getActionBar().setTitle(block.getTitle() == null ? getResources().getString(R.string.untitled_block) : block.getTitle());
 		setContentView(R.layout.edit_notes_activity);
 
@@ -62,8 +65,9 @@ public class EditNotesActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+
 		if (block != null) {
-			// removing listeners
+			block.setNotes(notesEdit.getText().toString());
 			notesEdit.removeTextChangedListener(notesTextWatcher);
 		}
 		block = null;

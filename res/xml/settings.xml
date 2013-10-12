@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<PreferenceCategory android:title="@string/appearance">
-		<reo7sp.cleverday.ui.preference.TimePreference
+		<reo7sp.cleverday.ui.TimePreference
 				android:defaultValue="9:00"
 				android:key="pref_day_start"
 				android:summary="@string/time_line_scroll_start"
@@ -40,12 +40,14 @@
 				android:title="@string/google_calendar" />
 
 		<CheckBoxPreference
+				android:defaultValue="true"
 				android:key="pref_modify_google"
 				android:summaryOn="@string/modify_google_on_summary"
 				android:summaryOff="@string/modify_google_off_summary"
 				android:title="@string/modify_google" />
 
 		<CheckBoxPreference
+				android:defaultValue="true"
 				android:key="pref_receive_from_google"
 				android:summaryOn="@string/receive_from_google_on_summary"
 				android:summaryOff="@string/receive_from_google_off_summary"
@@ -113,11 +115,23 @@
 			<PreferenceScreen
 					android:title="UndoBarController"
 					android:key="pref_undobarcontroller_link"
-					android:summary="https://code.google.com/p/romannurik-code/source/browse/misc/undobar/">
+					android:summary="https://code.google.com/p/romannurik-code/source/browse/misc/undobar">
 
 				<intent
 						android:action="android.intent.action.VIEW"
-						android:data="https://code.google.com/p/romannurik-code/source/browse/misc/undobar/"
+						android:data="https://code.google.com/p/romannurik-code/source/browse/misc/undobar"
+						/>
+
+			</PreferenceScreen>
+
+			<PreferenceScreen
+					android:title="ClearableEditText"
+					android:key="pref_clearableedittext_link"
+					android:summary="https://github.com/yanchenko/droidparts/blob/develop/droidparts/src/org/droidparts/widget/ClearableEditText.java">
+
+				<intent
+						android:action="android.intent.action.VIEW"
+						android:data="https://github.com/yanchenko/droidparts/blob/develop/droidparts/src/org/droidparts/widget/ClearableEditText.java"
 						/>
 
 			</PreferenceScreen>

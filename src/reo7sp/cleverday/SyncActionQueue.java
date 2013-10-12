@@ -11,6 +11,9 @@ public class SyncActionQueue extends ActionQueue {
 
 	@Override
 	public void addAction(Runnable action) {
+		if (action == null) {
+			return;
+		}
 		if (Looper.myLooper() == Looper.getMainLooper()) {
 			action.run();
 		} else {

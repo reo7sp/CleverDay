@@ -8,14 +8,14 @@ import reo7sp.cleverday.Core;
 /**
  * Created by reo7sp on 8/1/13 at 9:17 PM
  */
-public class DataBaseCommunicator extends SQLiteOpenHelper implements DataBaseConstants {
+public class DBCommunicator extends SQLiteOpenHelper implements DBConstants {
 	private static final int VERSION = 1;
 	private static final String DATABASE_NAME = "CleverDayData";
 	private final SQLiteDatabase db;
 
-	DataBaseCommunicator() {
+	DBCommunicator() {
 		super(Core.getContext(), DATABASE_NAME, null, VERSION);
-		db = getWritableDatabase();
+		db = getReadableDatabase();
 	}
 
 	@Override
@@ -26,10 +26,7 @@ public class DataBaseCommunicator extends SQLiteOpenHelper implements DataBaseCo
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
-	/**
-	 * @return the writable sqlite db instance
-	 */
-	public SQLiteDatabase getDB() {
+	public synchronized SQLiteDatabase getDB() {
 		return db;
 	}
 }

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -15,15 +16,15 @@ import android.widget.GridView;
 import android.widget.NumberPicker;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
+import reo7sp.cleverday.data.GoogleCalendar;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
 import reo7sp.cleverday.ui.colors.SimpleColor;
-import reo7sp.cleverday.ui.view.SteppedTimePicker;
 import reo7sp.cleverday.utils.DateUtils;
 import reo7sp.cleverday.utils.StringUtils;
 
@@ -114,7 +115,7 @@ public class Dialogs {
 		final NumberPicker picker = new NumberPicker(activity);
 		String[] days = new String[5];
 		for (int i = 0; i < days.length; i++) {
-			days[i] = StringUtils.makeFirstCharUpperCased(DateUtils.FORMAT_WEEKDAY_DAY_MONTH.format(new Date(Core.getCreationTime() + TimeConstants.DAY * (i - 2))));
+			days[i] = StringUtils.makeFirstCharUpperCased(Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH, Core.getCreationTime() + TimeConstants.DAY * (i - 2)));
 		}
 		picker.setDisplayedValues(days);
 		picker.setMinValue(0);
@@ -188,5 +189,46 @@ public class Dialogs {
 				setContentView(gridView);
 			}
 		};
+	}
+
+	public static Dialog createCalendarChooseDialog(final Context context) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+		// title
+		builder.setTitle(R.string.google_calendar);
+
+		// content
+		final GoogleCalendar[] calendars = new GoogleCalendar[Core.getGoogleCalendarStorage().getCalendars().size()];
+		CharSequence[] calendarsNames = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size()];
+		int i = 0;
+		for (GoogleCalendar calendar : Core.getGoogleCalendarStorage().getCalendars()) {
+			calendars[i] = calendar;
+			calendarsNames[i] = calendar.getName();
+			i++;
+		}
+
+		builder.setItems(calendarsNames, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				SharedPreferences.Editor editor = Core.getPreferences().edit();
+				editor.putString("pref_google_calendar", "" + calendars[which].getID());
+				editor.commit();
+
+				Core.getGoogleCalendarStorage().updateSettings();
+
+				dialog.cancel();
+			}
+		});
+
+		// buttons
+		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+
+		// returning dialog instance, but not showing it
+		return builder.create();
 	}
 }

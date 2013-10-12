@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.view;
+package reo7sp.cleverday.ui.timeline;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,10 +15,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.log.Log;
@@ -26,7 +26,6 @@ import reo7sp.cleverday.ui.BitmapFactory;
 import reo7sp.cleverday.ui.GestureListener;
 import reo7sp.cleverday.ui.Location2D;
 import reo7sp.cleverday.ui.ScrollAssistant;
-import reo7sp.cleverday.ui.TimeLinesLeader;
 import reo7sp.cleverday.ui.colors.UIColor;
 import reo7sp.cleverday.utils.AndroidUtils;
 import reo7sp.cleverday.utils.DateUtils;
@@ -43,38 +42,22 @@ public class TimeLineView extends View {
 	private final ScaleGestureDetector scaleGestureDetector;
 	private final GestureListener gestureListener = new MyGestureListener();
 	private final List<TimeBlockView> timeBlockViews = new TimeBlockViewsCollection();
-	private final List<TimeBlockView> immutableTimeBlockViews = Collections.unmodifiableList(timeBlockViews);
 	private long time;
 	private ScrollAssistant scrollAssistant;
-	private final boolean initialized;
 
 	public TimeLineView(Context context, long time) {
 		super(context);
+
 		gestureDetector = new GestureDetector(context, gestureListener);
 		scaleGestureDetector = new ScaleGestureDetector(context, gestureListener);
 		setWillNotDraw(false);
-		getLeader().addSlave(this);
-		setTime(time);
-		scrollTo(0, getLeader().getScrollY());
-		initialized = true;
-		Log.i("TimeLine", "Created new time line on " + DateUtils.FORMAT_DAY_MONTH.format(new Date(time)));
 
-		postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (getLeader().getCurrent() == TimeLineView.this) {
-					update();
-				}
-				postDelayed(this, 250);
-			}
-		}, 250);
-	}
+		Core.getTimeLinesLeader().addSlave(this);
+		updateTime(time);
+		scrollTo(0, Core.getTimeLinesLeader().getScrollY());
 
-	/**
-	 * @return the time lines leader
-	 */
-	public TimeLinesLeader getLeader() {
-		return Core.getTimeLinesLeader();
+		update(false);
+		Log.i("TimeLine", "Created new time line on " + Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH, time));
 	}
 
 	/**
@@ -82,11 +65,11 @@ public class TimeLineView extends View {
 	 *
 	 * @param block block to add
 	 */
-	public TimeBlockView addTimeBlock(TimeBlock block) {
+	TimeBlockView addTimeBlock(TimeBlock block) {
 		if (block == null) {
 			return null;
 		}
-		if (isTimeBlockAcceptable(block) && !hasBlock(block)) {
+		if (!hasBlock(block) && isTimeBlockAcceptable(block)) {
 			final TimeBlockView view = new TimeBlockView(this, block);
 			timeBlockViews.add(view);
 			Log.i("TimeLine", "Adding new time block \"" + block.getTitle() + "\" with id " + block.getID());
@@ -101,7 +84,7 @@ public class TimeLineView extends View {
 	 * @param block block to check
 	 * @return true if block is acceptable
 	 */
-	public boolean isTimeBlockAcceptable(TimeBlock block) {
+	private boolean isTimeBlockAcceptable(TimeBlock block) {
 		return DateUtils.isInOneDay(block.getStart(), time);
 	}
 
@@ -111,7 +94,7 @@ public class TimeLineView extends View {
 	 * @param block block of view
 	 * @return view of specified time block
 	 */
-	public TimeBlockView getView(TimeBlock block) {
+	private TimeBlockView getView(TimeBlock block) {
 		for (TimeBlockView view : timeBlockViews) {
 			if (view.getBlock().equals(block)) {
 				return view;
@@ -122,43 +105,41 @@ public class TimeLineView extends View {
 
 	/**
 	 * Updates all time blocks and time line itself
-	 */
-	public void update() {
-		update(false);
-	}
-
-	/**
-	 * Updates all time blocks and time line itself
 	 *
 	 * @param immediate true if animations must be prevented
 	 */
-	public void update(boolean immediate) {
-		if (!initialized || !Core.getDataCenter().isInvalidated()) {
-			return;
-		}
+	void update(boolean immediate) {
+		// updating all blocks
 		for (TimeBlockView view : timeBlockViews) {
 			view.update(immediate);
 		}
+
+		// sorting them
 		Collections.sort(timeBlockViews, timeBlockViewComparator);
+
+		// updating time line
 		postInvalidate();
-		if (getLeader().getCurrent() != this) {
-			scrollTo(0, getLeader().getScrollY());
+		if (Core.getTimeLinesLeader().getCurrent() != this) {
+			scrollTo(0, Core.getTimeLinesLeader().getScrollY());
 		}
 	}
 
 	/**
 	 * Removes all time blocks
 	 */
-	public void removeAllTimeBlocks() {
+	void removeAllTimeBlocks() {
 		Log.i("TimeLine", "Removing all time blocks");
 		timeBlockViews.clear();
 	}
 
+	/**
+	 * Repairs scroll
+	 */
 	private void repairScroll() {
 		if (getScrollY() < 0) {
 			super.scrollTo(0, 0);
-		} else if (getScrollY() > getLeader().getScrollMax()) {
-			super.scrollTo(0, getLeader().getScrollMax());
+		} else if (getScrollY() > Core.getTimeLinesLeader().getScrollMax()) {
+			super.scrollTo(0, Core.getTimeLinesLeader().getScrollMax());
 		}
 	}
 
@@ -195,13 +176,28 @@ public class TimeLineView extends View {
 		// drawing graph
 		canvas.drawPaint(Core.getPaint());
 		int curHour = DateUtils.isInOneDay(Core.getCreationTime(), time) ? DateUtils.getFromTime(System.currentTimeMillis(), Calendar.HOUR_OF_DAY) : -1;
-		for (int i = 0; i < 27; i++) {
+		for (int i = 0; i < 25; i++) {
 			int y = STEP * i + 8;
 
 			// time
 			Core.getPaint().setColor(i == curHour ? (darkTheme ? Color.WHITE : Color.BLACK) : (i > 23 ? (darkTheme ? Color.DKGRAY : Color.LTGRAY) : Color.GRAY));
 			Core.getPaint().setFakeBoldText(i == curHour);
-			canvas.drawText(((i % 24) < 10 ? "0" : "") + (i % 24), 10, y + 30, Core.getPaint());
+			if (Core.getDateFormatter().is24HourFormat()) {
+				int h = i % 24;
+				canvas.drawText((h < 10 ? "0" : "") + h, 10, y + 30, Core.getPaint());
+			} else {
+				boolean pm = i > 11;
+				int h = i - (pm ? 12 : 0);
+				if (h == 0) {
+					h = 12;
+				} else if (i == 25) {
+					h = 12;
+					pm = false;
+				}
+
+				canvas.drawText((h < 10 ? "0" : "") + h, 10, y + 30, Core.getPaint());
+				canvas.drawText(pm ? "PM" : "AM", 5, y + 60, Core.getPaint());
+			}
 			Core.getPaint().setFakeBoldText(false);
 
 			// line
@@ -222,36 +218,32 @@ public class TimeLineView extends View {
 	}
 
 	/**
-	 * Removes time block from time line, but doesn't remove from database
+	 * Removes time block from time line
 	 *
 	 * @param block block to remove
 	 */
-	public void removeTimeBlock(TimeBlock block) {
+	void removeTimeBlock(TimeBlock block) {
 		removeTimeBlock(getView(block));
 	}
 
 	/**
-	 * Removes time block from time line, but doesn't remove from database
+	 * Removes time block from time line
 	 *
 	 * @param view block view to remove
 	 */
-	public void removeTimeBlock(final TimeBlockView view) {
+	private void removeTimeBlock(final TimeBlockView view) {
 		if (view == null) {
 			return;
 		}
 		view.startAlphaAnimation(false, new Runnable() {
 			@Override
 			public void run() {
-				removeTimeBlockView(view);
+				Log.i("TimeLine", "Removing time block \"" + view.getBlock().getTitle() + "\" with id " + view.getBlock().getID());
+				view.setSelected(false);
+				view.stopAllAnimations();
+				timeBlockViews.remove(view);
 			}
 		});
-	}
-
-	private void removeTimeBlockView(TimeBlockView view) {
-		Log.i("TimeLine", "Removing time block \"" + view.getBlock().getTitle() + "\" with id " + view.getBlock().getID());
-		view.setSelected(false);
-		view.stopAllAnimations();
-		timeBlockViews.remove(view);
 	}
 
 	/**
@@ -261,7 +253,7 @@ public class TimeLineView extends View {
 		return time;
 	}
 
-	private void setTime(long time) {
+	private void updateTime(long time) {
 		this.time = time;
 
 		// re-adding all blocks
@@ -271,11 +263,26 @@ public class TimeLineView extends View {
 		}
 	}
 
+	private void moveIntersectedWith(TimeBlockView view) {
+		for (TimeBlockView view1 : timeBlockViews) {
+			if (view1 != view && view1.intersects(view)) {
+				if (view1.getY() < view.getY()) {
+					view1.getBlock().move(view.getBlock().getStart() - view1.getBlock().getEnd());
+				} else {
+					view1.getBlock().move(view.getBlock().getEnd() - view1.getBlock().getStart());
+				}
+
+				view1.update(false);
+				moveIntersectedWith(view1);
+			}
+		}
+	}
+
 	/**
-	 * @return the immutable collection of time block views
+	 * @return the collection of time block views
 	 */
-	public Collection<TimeBlockView> getTimeBlockViews() {
-		return immutableTimeBlockViews;
+	Collection<TimeBlockView> getTimeBlockViews() {
+		return timeBlockViews;
 	}
 
 	/**
@@ -284,41 +291,37 @@ public class TimeLineView extends View {
 	 * @param block block to check
 	 * @return true if block contains in this time line
 	 */
-	public boolean hasBlock(TimeBlock block) {
+	private boolean hasBlock(TimeBlock block) {
 		return getView(block) != null;
 	}
 
 	private class MyGestureListener extends GestureListener {
 		@Override
 		public void onLongPress(MotionEvent e) {
-			TimeBlockView view = getLeader().getEditingBlock();
-			if (view != null) {
-				return;
-			}
-
 			onSingleTapUp(e);
 
-			view = getLeader().getEditingBlock();
-			if (view != null) {
+			TimeBlockView editingBlock = Core.getTimeLinesLeader().getEditingBlock();
+			if (editingBlock != null) {
 				int y = (int) e.getY() + getScrollY();
-				view.startDragging(new Location2D((int) e.getX(), y - view.getY()), true);
+				editingBlock.startDragging(new Location2D((int) e.getX(), y - editingBlock.getY()), true);
 				Core.getVibrator().vibrate(75);
 			}
 		}
 
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-			if (getLeader().getEditingBlock() == null || !getLeader().getEditingBlock().isDragging()) {
+			TimeBlockView editingBlock = Core.getTimeLinesLeader().getEditingBlock();
+			if (editingBlock == null || !editingBlock.isDragging()) {
 				scrollBy(0, (int) distanceY);
-				getLeader().scrollTo(getScrollY());
-				getLeader().updateScroll(true);
+				Core.getTimeLinesLeader().setScrollY(getScrollY());
 			}
 			return super.onScroll(e1, e2, distanceX, distanceY);
 		}
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-			if (getLeader().getEditingBlock() == null || !getLeader().getEditingBlock().isDragging()) {
+			TimeBlockView editingBlock = Core.getTimeLinesLeader().getEditingBlock();
+			if (editingBlock == null || !editingBlock.isDragging()) {
 				scrollAssistant = new ScrollAssistant(TimeLineView.this, 0, 0, 0, STEP * 25 - getHeight());
 				scrollAssistant.fling((int) velocityX, (int) velocityY);
 			}
@@ -329,17 +332,23 @@ public class TimeLineView extends View {
 		public boolean onSingleTapUp(MotionEvent e) {
 			int y = (int) e.getY() + getScrollY();
 
-			TimeBlockView editingBlock = getLeader().getEditingBlock();
+			TimeBlockView editingBlock = Core.getTimeLinesLeader().getEditingBlock();
+			boolean findNewBlockToSelect = true;
 
 			if (editingBlock != null) {
 				if (y < editingBlock.getY() - 32 || y > editingBlock.getY() + editingBlock.getHeight() + 32) {
 					editingBlock.setSelected(false);
+				} else {
+					findNewBlockToSelect = false;
 				}
 			}
-			for (TimeBlockView view : timeBlockViews) {
-				if (y > view.getY() - 32 && y < view.getY() + view.getHeight() + 32) {
-					view.setSelected(true);
-					break;
+
+			if (findNewBlockToSelect) {
+				for (TimeBlockView view : timeBlockViews) {
+					if (y > view.getY() - 32 && y < view.getY() + view.getHeight() + 32) {
+						view.setSelected(true);
+						break;
+					}
 				}
 			}
 
@@ -355,45 +364,55 @@ public class TimeLineView extends View {
 				if (scrollAssistant != null) {
 					scrollAssistant.forceFinished();
 					scrollAssistant = null;
-					getLeader().scrollTo(getScrollY());
+					Core.getTimeLinesLeader().setScrollY(getScrollY());
 				}
 			}
 
 			// block dragging and selecting
-			TimeBlockView editingBlock = getLeader().getEditingBlock();
+			TimeBlockView editingBlock = Core.getTimeLinesLeader().getEditingBlock();
 			if (editingBlock != null) {
 				if (e.getAction() == MotionEvent.ACTION_UP) {
 					editingBlock.stopDragging();
-				}
-				if (e.getAction() == MotionEvent.ACTION_DOWN && y > editingBlock.getY() - 32 && y < editingBlock.getY() + editingBlock.getHeight() + 32) {
+				} else if (e.getAction() == MotionEvent.ACTION_DOWN && y > editingBlock.getY() - 32 && y < editingBlock.getY() + editingBlock.getHeight() + 32) {
 					editingBlock.startDragging(new Location2D((int) e.getX(), y - editingBlock.getY()), false);
 				}
+
 				if (editingBlock.isDragging()) {
 					boolean resized = false;
-					if (editingBlock.getDragStartLocation().getX() - 32 < 50 + (getWidth() - 50) / 2 && editingBlock.getDragStartLocation().getX() + 32 > 50 + (getWidth() - 50) / 2) {
+					final int CENTER_OF_BLOCK = 50 + (getWidth() - 50) / 2;
+
+					// analyzing if user resized block
+					if (editingBlock.getDragStartLocation().getX() - 32 < CENTER_OF_BLOCK && editingBlock.getDragStartLocation().getX() + 32 > CENTER_OF_BLOCK) {
+						int pos = 0;
 						if (editingBlock.getDragStartLocation().getY() < 32) {
-							long nextTime = (long) (DateUtils.trimToDay(time) + y / (float) STEP * 3600000);
-							if (DateUtils.isInOneDay(time, nextTime)) {
-								editingBlock.getBlock().setStart(nextTime);
-							}
-							resized = true;
+							pos = 1;
 						} else if (editingBlock.getDragStartLocation().getY() > editingBlock.getHeight() - 32) {
+							pos = 2;
+						}
+
+						if (pos != 0) {
 							long nextTime = (long) (DateUtils.trimToDay(time) + y / (float) STEP * 3600000);
 							if (DateUtils.isInOneDay(time, nextTime)) {
-								editingBlock.getBlock().setEnd(nextTime);
+								editingBlock.getBlock().setTime(nextTime, pos == 1, false);
 							}
 							resized = true;
 
-							editingBlock.startDragging(new Location2D(editingBlock.getDragStartLocation().getX(), y - editingBlock.getY()), false); // update drag start y
+							if (pos == 2) {
+								editingBlock.startDragging(new Location2D(editingBlock.getDragStartLocation().getX(), y - editingBlock.getY()), false); // update drag start y
+							}
 						}
 					}
+
+					// if user doesn't resize block, we'll drag it
 					if (!resized) {
 						long nextTime = (long) (DateUtils.trimToDay(time) + (y - editingBlock.getDragStartLocation().getY()) / (float) STEP * 3600000);
 						if (DateUtils.isInOneDay(time, nextTime)) {
 							editingBlock.getBlock().setBounds(nextTime, editingBlock.getBlock().getDuration() + nextTime, false);
 						}
 					}
-					editingBlock.update();
+
+					editingBlock.update(false);
+					moveIntersectedWith(editingBlock);
 				}
 			}
 		}
@@ -403,14 +422,14 @@ public class TimeLineView extends View {
 		@Override
 		public boolean add(TimeBlockView object) {
 			super.add(object);
-			update();
+			update(false);
 			return true;
 		}
 
 		@Override
 		public boolean addAll(Collection<? extends TimeBlockView> collection) {
 			super.addAll(collection);
-			update();
+			update(false);
 			return true;
 		}
 
@@ -423,21 +442,21 @@ public class TimeLineView extends View {
 		@Override
 		public boolean remove(Object object) {
 			super.remove(object);
-			update();
+			update(false);
 			return true;
 		}
 
 		@Override
 		public boolean removeAll(Collection<?> collection) {
 			super.removeAll(collection);
-			update();
+			update(false);
 			return true;
 		}
 
 		@Override
 		public boolean retainAll(Collection<?> collection) {
 			super.retainAll(collection);
-			update();
+			update(false);
 			return true;
 		}
 	}

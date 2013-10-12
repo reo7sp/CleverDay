@@ -19,15 +19,17 @@ public class BitmapFactory {
 	 * @return the bitmap
 	 */
 	public static Bitmap getBitmap(int id) {
-		if (cache.size() > 32) {
-			cache.clear();
+		synchronized (cache) {
+			if (cache.size() > 32) {
+				cache.clear();
+			}
+			Bitmap bitmap = cache.get(id);
+			if (bitmap == null) {
+				Log.i("BitmapFactory", "Loading new bitmap with id " + id);
+				bitmap = android.graphics.BitmapFactory.decodeResource(Core.getContext().getResources(), id);
+				cache.put(id, bitmap);
+			}
+			return bitmap;
 		}
-		Bitmap bitmap = cache.get(id);
-		if (bitmap == null) {
-			Log.i("BitmapFactory", "Loading new bitmap with id " + id);
-			bitmap = android.graphics.BitmapFactory.decodeResource(Core.getContext().getResources(), id);
-			cache.put(id, bitmap);
-		}
-		return bitmap;
 	}
 }

@@ -1,15 +1,12 @@
 package reo7sp.cleverday.ui.activity;
 
 import android.app.Activity;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
@@ -33,7 +30,7 @@ public class PostponeActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// parsing intent args
-		int id = getIntent().getIntExtra("id", -1);
+		long id = getIntent().getLongExtra("id", -1);
 		block = Core.getDataCenter().getBlock(id);
 		if (block == null) {
 			finish();
@@ -41,13 +38,10 @@ public class PostponeActivity extends Activity {
 		}
 
 		// other...
-		getActionBar().setLogo(R.drawable.ic_for_bar_light);
 		getActionBar().setTitle(getResources().getString(R.string.postpone) + " \"" + block.getHumanTitle() + "\"");
 		getActionBar().setBackgroundDrawable(new ColorDrawable(ColorUtils.darker(block.getColor(), AndroidUtils.isInDarkTheme() ? 0.25f : 0)));
-		setContentView(R.layout.postpone_activity);
-		TextView actionBarTitle = (TextView) findViewById(Resources.getSystem().getIdentifier("action_bar_title", "id", "android"));
-		actionBarTitle.setTextColor(Color.WHITE);
 		invalidateOptionsMenu();
+		setContentView(R.layout.postpone_activity);
 
 		// finding views
 		ListView postponeList = (ListView) findViewById(R.id.postpone_list);

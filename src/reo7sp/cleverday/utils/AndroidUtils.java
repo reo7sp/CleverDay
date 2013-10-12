@@ -70,4 +70,13 @@ public class AndroidUtils {
 	public static boolean isNotificationShown() {
 		return Core.getPreferences().getBoolean("pref_show_notification", true);
 	}
+
+	/**
+	 * Checks if welcome screen was completed
+	 *
+	 * @return true if welcome screen was completed
+	 */
+	public static boolean isWelcomeScreenCompleted() {
+		return Core.getPreferences().getBoolean("pref_welcome", false);
+	}
 }

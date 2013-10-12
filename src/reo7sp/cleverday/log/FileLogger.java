@@ -6,11 +6,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import reo7sp.cleverday.utils.DateUtils;
+import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 
 /**
  * Created by reo7sp on 8/12/13 at 12:03 PM
@@ -50,7 +50,7 @@ public class FileLogger extends Thread {
 	}
 
 	public void log(String tag, String message, LogLevel level) {
-		String date = DateUtils.FORMAT_DAY_MONTH_HOUR_MINUTE_SECOND_MILLISECOND.format(new Date());
+		String date = Core.getDateFormatter().format(DateFormatter.Format.DAY_MONTH_HOUR_MINUTE_SECOND_MILLISECOND, System.currentTimeMillis());
 		queue.add("[" + date + "] [" + level + "] [" + tag + "] " + message);
 	}
 
@@ -59,7 +59,7 @@ public class FileLogger extends Thread {
 		try {
 			String s;
 			while (!isInterrupted()) {
-				sleep(1000);
+				Thread.sleep(1000);
 				while ((s = queue.poll()) != null) {
 					writer.println(s);
 				}

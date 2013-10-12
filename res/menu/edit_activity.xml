@@ -5,14 +5,13 @@
 			android:id="@+id/action_edit_menu_color"
 			android:icon="@drawable/ic_palette_light"
 			android:showAsAction="ifRoom"
-			android:title="@string/change_color">
-	</item>
+			android:title="@string/change_color" />
+
 	<item
 			android:id="@+id/action_edit_menu_reminder"
 			android:checkable="true"
 			android:icon="@drawable/ic_alarm_light"
 			android:showAsAction="ifRoom"
-			android:title="@string/reminder">
-	</item>
+			android:title="@string/reminder" />
 
 </menu>

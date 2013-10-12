@@ -4,40 +4,54 @@ package reo7sp.cleverday.data;
  * Created by reo7sp on 8/1/13 at 2:33 PM
  */
 public class DataStorageLeader {
-	private final DataStorage[] slaves;
+	private LocalDataStorage[] localDataStorages;
+	private ExternalDataStorage[] externalDataStorages;
 
-	DataStorageLeader(DataCenter dataCenter) {
-		slaves = new DataStorage[] {
-				new LocalDataStorage(dataCenter),
-				new HistoryStorage(dataCenter),
-				new GoogleCalendarStorage(dataCenter),
+	DataStorageLeader() {
+	}
+
+	synchronized void init() {
+		localDataStorages = new LocalDataStorage[] {
+				new MainDataStorage(),
+				new HistoryStorage(),
+		};
+		externalDataStorages = new ExternalDataStorage[] {
+				new GoogleCalendarStorage(),
 		};
 	}
 
 	public synchronized void load() {
-		for (DataStorage slave : slaves) {
+		for (LocalDataStorage slave : localDataStorages) {
 			slave.load();
 		}
 	}
 
-	public synchronized void receive() {
-		for (DataStorage slave : slaves) {
-			slave.receive();
-		}
-	}
-
 	public synchronized void save() {
-		for (DataStorage slave : slaves) {
+		for (LocalDataStorage slave : localDataStorages) {
 			slave.save();
 		}
 	}
 
-	public synchronized void sync() {
-		for (DataStorage slave : slaves) {
-			slave.syncDataCenterWithMe();
+	public synchronized void remove(TimeBlock block) {
+		for (LocalDataStorage slave : localDataStorages) {
+			slave.remove(block);
 		}
-		for (DataStorage slave : slaves) {
-			slave.syncMeWithDataCenter();
+	}
+
+	public synchronized void sync() {
+		receive();
+		send();
+	}
+
+	private void receive() {
+		for (ExternalDataStorage slave : externalDataStorages) {
+			slave.receive();
+		}
+	}
+
+	private void send() {
+		for (ExternalDataStorage slave : externalDataStorages) {
+			slave.send();
 		}
 	}
 }

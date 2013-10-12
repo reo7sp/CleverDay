@@ -5,39 +5,37 @@ package reo7sp.cleverday;
  */
 public interface TimeConstants {
 	/**
+	 * Half of second in milliseconds
+	 */
+	public static final long HALF_OF_SECOND = 500; // 500 milliseconds
+
+	/**
 	 * Second in milliseconds
 	 */
-	public static final long SECOND = 1000; // 1000 milliseconds
+	public static final long SECOND = HALF_OF_SECOND * 2; // 1000 milliseconds
+
 	/**
 	 * Minute in milliseconds
 	 */
 	public static final long MINUTE = SECOND * 60; // 60000 milliseconds
+
 	/**
 	 * Hour in milliseconds
 	 */
 	public static final long HOUR = MINUTE * 60; // 3600000 milliseconds
+
 	/**
 	 * Half of hour (30 minutes) in milliseconds
 	 */
 	public static final long HALF_OF_HOUR = MINUTE * 30; // 1800000 milliseconds
+
 	/**
 	 * Quarter of hour (15 minutes) in milliseconds
 	 */
 	public static final long QUARTER_OF_HOUR = MINUTE * 15; // 900000 milliseconds
+
 	/**
 	 * Day in milliseconds
 	 */
 	public static final long DAY = HOUR * 24; // 86400000 milliseconds
-	/**
-	 * Week in milliseconds
-	 */
-	public static final long WEEK = DAY * 7; // 604800000 milliseconds
-	/**
-	 * Month in milliseconds
-	 */
-	public static final long MONTH = DAY * 30; // 2592000000 milliseconds
-	/**
-	 * Year in milliseconds
-	 */
-	public static final long YEAR = DAY * 365; // 31536000000 milliseconds
 }

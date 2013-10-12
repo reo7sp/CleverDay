@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.view;
+package reo7sp.cleverday.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -95,7 +95,7 @@ public class PopupBar {
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
-						if (element.onClick(pos)) {
+						if (element.onClick()) {
 							hide();
 						}
 					}
@@ -224,7 +224,7 @@ public class PopupBar {
 	}
 
 	public static abstract class PopupBarElement {
-		public boolean onClick(int pos) {
+		public boolean onClick() {
 			return false;
 		}
 

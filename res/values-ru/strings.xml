@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
 
+<resources>
 	<string name="untitled_block">Безымянный блок</string>
 	<string name="today">cегодня</string>
 	<string name="appearance">Вид</string>
@@ -23,8 +23,6 @@
 	<string name="notes">Заметки…</string>
 	<string name="set_time">Установить время</string>
 	<string name="set_date">Напоминание отключено</string>
-	<string name="reminder_set">Напоминание установлено</string>
-	<string name="reminder_unset">Напоминание отключено</string>
 	<string name="change_color">Изменить цвет</string>
 	<string name="reminder">Напоминание</string>
 	<string name="add">Добавить</string>
@@ -32,7 +30,6 @@
 	<string name="edit">Редактировать</string>
 	<string name="deleted">Удалено</string>
 	<string name="title">Заголовок</string>
-	<string name="sync_priority">Приоритет синхронизации</string>
 	<string name="set">Установить</string>
 	<string name="cancel">Отменить</string>
 	<string name="select_color">Выбери цвет</string>
@@ -59,8 +56,8 @@
 	<string name="hours4">4 часа</string>
 	<string name="hour1minutes30">Полтора часа</string>
 	<string name="event_color">Цвет события в Google Calendar</string>
-	<string name="calendar_event_color_on_summary">Цвет календаря в Google Calendar</string>
-	<string name="calendar_event_color_off_summary">Цвет блока в CleverDay</string>
+	<string name="calendar_event_color_on_summary">Цвет календаря Google Calendar</string>
+	<string name="calendar_event_color_off_summary">Цвет блока CleverDay</string>
 	<string name="use_mobile_network">Использовать мобильную сеть</string>
 	<string name="use_only_wifi">Только Wi-Fi</string>
 	<string name="use_mobile_network_and_wifi">Мобильная сеть и Wi-Fi</string>
@@ -75,5 +72,12 @@
 	<string name="rate_app">Оценить приложение</string>
 	<string name="submit_help">Отправить баг-репорт/функцию/перевод</string>
 	<string name="on_google_play">На Google Play</string>
-
+	<string name="welcome">Добро пожаловать</string>
+	<string name="history">История</string>
+	<string name="no_history">Вы не создали пока ни одну задачу</string>
+	<string name="syncing">Идет синхронизация…</string>
+	<string name="skip">Пропустить</string>
+	<string name="login">Войти</string>
+	<string name="press_me">Нажми на меня!</string>
+	<string name="and_drag">И перетащи!</string>
 </resources>

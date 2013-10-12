@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+	<NumberPicker android:id="@+id/hour_picker"
+	              android:layout_width="48dp"
+	              android:layout_height="wrap_content"
+	              android:layout_toLeftOf="@+id/separator"
+	              android:layout_centerVertical="true" />
+
+	<TextView android:id="@+id/separator"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:text=":"
+	          android:padding="4dp"
+	          style="@android:style/TextAppearance.Large"
+	          android:layout_toLeftOf="@+id/minute_picker"
+	          android:layout_centerVertical="true" />
+
+	<NumberPicker android:id="@+id/minute_picker"
+	              android:layout_width="32dp"
+	              android:layout_height="wrap_content"
+	              android:layout_centerHorizontal="true"
+	              android:layout_centerVertical="true" />
+
+	<TextView android:id="@+id/separator1"
+	          style="@android:style/TextAppearance.Large"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:text=":"
+	          android:textColor="@android:color/transparent"
+	          android:padding="4dp"
+	          android:layout_toRightOf="@+id/minute_picker"
+	          android:layout_centerVertical="true" />
+
+	<NumberPicker android:id="@+id/h12_picker"
+	              android:layout_width="48dp"
+	              android:layout_height="wrap_content"
+	              android:layout_toRightOf="@+id/separator1"
+	              android:layout_centerVertical="true" />
+</RelativeLayout>

@@ -9,7 +9,6 @@ import android.preference.PreferenceActivity;
 import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.data.GoogleCalendar;
-import reo7sp.cleverday.data.GoogleCalendarStorage;
 import reo7sp.cleverday.log.Log;
 import reo7sp.cleverday.utils.AndroidUtils;
 
@@ -57,25 +56,25 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 			pref.setSummary(getResources().getString(R.string.time_line_scroll_start).replace('9', Core.getPreferences().getString(pref.getKey(), "9:00").charAt(0)));
 		} else if (pref.getKey().equals("pref_google_calendar")) {
 			// updating google calendar storage settings
-			GoogleCalendarStorage.updateSettings();
+			Core.getGoogleCalendarStorage().updateSettings();
 
 			// setting summary
-			pref.setSummary(GoogleCalendarStorage.getMainCalendar() == null ? getResources().getString(R.string.none) : GoogleCalendarStorage.getMainCalendar().getName());
+			pref.setSummary(Core.getGoogleCalendarStorage().getMainCalendar() == null ? getResources().getString(R.string.none) : Core.getGoogleCalendarStorage().getMainCalendar().getName());
 
 			// setting value to none if main calendar == null
-			if (GoogleCalendarStorage.getMainCalendar() == null) {
+			if (Core.getGoogleCalendarStorage().getMainCalendar() == null) {
 				SharedPreferences.Editor editor = Core.getPreferences().edit();
 				editor.putString(pref.getKey(), getResources().getString(R.string.none));
 				editor.commit();
 			}
 
 			// updating preference list entries
-			CharSequence[] calendars = new CharSequence[GoogleCalendarStorage.getCalendars().size() + 1];
-			CharSequence[] calendarValues = new CharSequence[GoogleCalendarStorage.getCalendars().size() + 1];
+			CharSequence[] calendars = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size() + 1];
+			CharSequence[] calendarValues = new CharSequence[Core.getGoogleCalendarStorage().getCalendars().size() + 1];
 			calendars[0] = getResources().getString(R.string.none);
 			calendarValues[0] = "none";
 			int i = 1;
-			for (GoogleCalendar calendar : GoogleCalendarStorage.getCalendars()) {
+			for (GoogleCalendar calendar : Core.getGoogleCalendarStorage().getCalendars()) {
 				calendars[i] = calendar.getName();
 				calendarValues[i] = "" + calendar.getID();
 				i++;

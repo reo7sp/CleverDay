@@ -1,4 +1,4 @@
-package reo7sp.cleverday.ui.view;
+package reo7sp.cleverday.ui.timeline;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,11 +13,13 @@ import java.util.Calendar;
 import java.util.Collection;
 
 import reo7sp.cleverday.Core;
+import reo7sp.cleverday.DateFormatter;
 import reo7sp.cleverday.R;
 import reo7sp.cleverday.TimeConstants;
 import reo7sp.cleverday.data.TimeBlock;
 import reo7sp.cleverday.ui.BitmapFactory;
 import reo7sp.cleverday.ui.Location2D;
+import reo7sp.cleverday.ui.PopupBar;
 import reo7sp.cleverday.ui.activity.EditBlockActivity;
 import reo7sp.cleverday.ui.colors.SimpleColor;
 import reo7sp.cleverday.utils.AndroidUtils;
@@ -31,6 +33,7 @@ public class TimeBlockView {
 	private boolean isDragging;
 	private ActionMode actionMode;
 	private Location2D dragStartLocation;
+	private String[] notes;
 	private boolean deselectAfterDragging;
 	private int y;
 	private int height;
@@ -66,42 +69,20 @@ public class TimeBlockView {
 		canvas.drawRect(50, y, timeLine.getWidth() - 8, y + height, Core.getPaint());
 
 		// text
+		int offset = Core.getDateFormatter().is24HourFormat() ? 0 : 40;
 		Core.getPaint().setColor(ColorUtils.changeAlpha(Color.WHITE, alpha));
-		canvas.drawText(block.getHumanTitle(), 130, y + 30, Core.getPaint());
-		canvas.drawText(DateUtils.FORMAT_HOUR_MINUTE.format(block.getStart()), 60, y + 30, Core.getPaint());
+		canvas.drawText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getStart()), 60, y + 30, Core.getPaint());
+		canvas.drawText(block.getHumanTitle(), offset + 130, y + 30, Core.getPaint());
 		if (height > 70) {
-			canvas.drawText(DateUtils.FORMAT_HOUR_MINUTE.format(block.getEnd()), 60, y + height - 10, Core.getPaint());
+			canvas.drawText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getEnd()), 60, y + height - 10, Core.getPaint());
 		}
 
 		// notes
-		String[] notes = block.getNotes() == null ? null : block.getNotes().replaceAll("\n\n+", "\n").split("\n");
 		if (notes != null) {
-			Collection<String> lines = new ArrayList<String>();
-			for (String line : notes) {
-				float width = 0;
-				StringBuilder builder = new StringBuilder();
-				String[] words = line.split(" ");
-
-				for (String word : words) {
-					word += " ";
-					width += Core.getPaint().measureText(word);
-
-					if (width > timeLine.getWidth() - 130) {
-						lines.add(builder.toString());
-						builder = new StringBuilder();
-						width = Core.getPaint().measureText(word);
-					}
-					builder.append(word);
-				}
-
-				lines.add(builder.toString());
-			}
-
-			int i = 2;
-			for (String line : lines) {
-				int lineY = 10 + 30 * i++;
+			for (int i = 0, length = notes.length; i < length; i++) {
+				int lineY = 10 + 30 * (i + 2);
 				if (height > lineY + 10) {
-					canvas.drawText(line, 130, y + lineY, Core.getPaint());
+					canvas.drawText(notes[i], offset + 130, y + lineY, Core.getPaint());
 				}
 			}
 		}
@@ -142,17 +123,10 @@ public class TimeBlockView {
 	 * @param toFullyVisible true if alpha must be incremented to 255
 	 * @param onStop         stop listener
 	 */
-	public void startAlphaAnimation(boolean toFullyVisible, Runnable onStop) {
+	void startAlphaAnimation(boolean toFullyVisible, Runnable onStop) {
 		Core.getSyncActionQueue().removeAction(alphaAnimation);
 		alphaAnimation = new AlphaAnimation(toFullyVisible, onStop);
 		Core.getSyncActionQueue().addAction(alphaAnimation);
-	}
-
-	/**
-	 * Updates block
-	 */
-	public void update() {
-		update(false);
 	}
 
 	/**
@@ -164,6 +138,7 @@ public class TimeBlockView {
 		checkDay();
 		repairPosition(immediate);
 		repairSize(immediate);
+		updateNotes();
 	}
 
 	/**
@@ -189,6 +164,7 @@ public class TimeBlockView {
 	private void repairPosition(boolean immediate) {
 		Core.getSyncActionQueue().removeAction(positionAnimation);
 		if (immediate) {
+			positionAnimation = null;
 			y = generateY();
 		} else {
 			positionAnimation = new PositionAnimation();
@@ -197,13 +173,14 @@ public class TimeBlockView {
 	}
 
 	/**
-	 * Repairs y
+	 * Repairs size
 	 *
 	 * @param immediate true if animations must be prevented
 	 */
 	private void repairSize(boolean immediate) {
 		Core.getSyncActionQueue().removeAction(sizeAnimation);
 		if (immediate) {
+			sizeAnimation = null;
 			height = generateHeight();
 		} else {
 			sizeAnimation = new SizeAnimation();
@@ -230,6 +207,37 @@ public class TimeBlockView {
 		alphaAnimation = null;
 		positionAnimation = null;
 		sizeAnimation = null;
+	}
+
+	private void updateNotes() {
+		String[] notes = block.getNotes() == null ? null : block.getNotes().replaceAll("\n\n+", "\n").split("\n");
+		if (notes != null) {
+			Collection<String> lines = new ArrayList<String>();
+			for (String line : notes) {
+				int width = 0;
+				StringBuilder builder = new StringBuilder();
+				String[] words = line.split(" ");
+
+				for (String word : words) {
+					word += " ";
+					width += Core.getPaint().measureText(word);
+
+					if (width > timeLine.getWidth() - 130) {
+						lines.add(builder.toString());
+						builder = new StringBuilder();
+						width = (int) Core.getPaint().measureText(word);
+					}
+					builder.append(word);
+				}
+
+				lines.add(builder.toString());
+			}
+
+			this.notes = new String[lines.size()];
+			lines.toArray(this.notes);
+		} else {
+			this.notes = null;
+		}
 	}
 
 	@Override
@@ -266,13 +274,13 @@ public class TimeBlockView {
 	 * @return generated height
 	 */
 	private int generateHeight() {
-		return (int) (block.getDuration() / (float) TimeConstants.HOUR * TimeLineView.STEP);
+		return (int) (block.getDuration() * TimeLineView.STEP / TimeConstants.HOUR);
 	}
 
 	/**
 	 * @return true if is dragging
 	 */
-	public boolean isDragging() {
+	boolean isDragging() {
 		return isDragging;
 	}
 
@@ -281,7 +289,7 @@ public class TimeBlockView {
 	 *
 	 * @param dragStartLocation drag start location
 	 */
-	public void startDragging(Location2D dragStartLocation, boolean deselectAfterDragging) {
+	void startDragging(Location2D dragStartLocation, boolean deselectAfterDragging) {
 		if (isSelected) {
 			isDragging = true;
 			this.dragStartLocation = dragStartLocation;
@@ -292,7 +300,7 @@ public class TimeBlockView {
 	/**
 	 * Stops drag mode of view
 	 */
-	public void stopDragging() {
+	void stopDragging() {
 		isDragging = false;
 		if (deselectAfterDragging) {
 			setSelected(false);
@@ -309,14 +317,14 @@ public class TimeBlockView {
 	/**
 	 * @return true if is selected
 	 */
-	public boolean isSelected() {
+	boolean isSelected() {
 		return isSelected;
 	}
 
 	/**
 	 * @param isSelected true if block must be selected
 	 */
-	public void setSelected(final boolean isSelected) {
+	void setSelected(final boolean isSelected) {
 		// stopping dragging if unselected
 		if (!isSelected) {
 			isDragging = false;
@@ -346,50 +354,61 @@ public class TimeBlockView {
 		timeLine.postInvalidate();
 	}
 
+
+	/**
+	 * Checks if specified time block view intersects with this time block view
+	 *
+	 * @param view time block view to check
+	 * @return true if specified time block view intersects with this time block view
+	 */
+	boolean intersects(TimeBlockView view) {
+		return view.getBlock().intersects(block);
+	}
+
 	/**
 	 * @return the drag start location
 	 */
-	public Location2D getDragStartLocation() {
+	Location2D getDragStartLocation() {
 		return dragStartLocation;
 	}
 
 	/**
 	 * @return the y
 	 */
-	public int getY() {
+	int getY() {
 		return positionAnimation == null ? y : positionAnimation.nextY;
 	}
 
 	/**
 	 * @return the height
 	 */
-	public int getHeight() {
+	int getHeight() {
 		return sizeAnimation == null ? height : sizeAnimation.nextHeight;
 	}
 
 	private class PositionAnimation implements Runnable {
-		public final int nextY = generateY();
+		private final int nextY = generateY();
 
 		@Override
 		public void run() {
 			if (nextY != y) {
 				// if view is away from screen bounds, block way will be shorted
-				if (y < timeLine.getScrollY() - getHeight() && nextY > timeLine.getScrollY() - getHeight()) {
-					y = timeLine.getScrollY() - getHeight();
-				} else if (y > timeLine.getScrollY() + timeLine.getHeight() && nextY < timeLine.getScrollY() + timeLine.getHeight()) {
-					y = timeLine.getScrollY() + timeLine.getHeight();
+				int a = timeLine.getScrollY() - getHeight();
+				int b = timeLine.getScrollY() + getHeight();
+				if (y < a && nextY > a) {
+					y = a;
+				} else if (y > b && nextY < b) {
+					y = b;
 				}
 
 				// calculating y
-				float multiplier = (nextY - y) / 8F;
+				int multiplier = (nextY - y) / 8;
 				if (multiplier > 32) {
 					multiplier = 32;
 				} else if (multiplier < -32) {
 					multiplier = -32;
-				} else if (multiplier < 1 && multiplier > 0) {
-					multiplier = 1;
-				} else if (multiplier > -1 && multiplier < 0) {
-					multiplier = -1;
+				} else if (multiplier == 0) {
+					multiplier = nextY > y ? 1 : -1;
 				}
 				if (positionAnimation == this) {
 					y += multiplier;
@@ -401,21 +420,19 @@ public class TimeBlockView {
 	}
 
 	private class SizeAnimation implements Runnable {
-		public final int nextHeight = generateHeight();
+		private final int nextHeight = generateHeight();
 
 		@Override
 		public void run() {
 			if (nextHeight != height) {
 				// calculating height
-				float multiplier = (nextHeight - height) / 8F;
+				int multiplier = (nextHeight - height) / 8;
 				if (multiplier > 32) {
 					multiplier = 32;
 				} else if (multiplier < -32) {
 					multiplier = -32;
-				} else if (multiplier < 1 && multiplier > 0) {
-					multiplier = 1;
-				} else if (multiplier > -1 && multiplier < 0) {
-					multiplier = -1;
+				} else if (multiplier == 0) {
+					multiplier = nextHeight > height ? 1 : -1;
 				}
 				if (sizeAnimation == this) {
 					height += multiplier;
@@ -455,7 +472,7 @@ public class TimeBlockView {
 						}
 					}, new PopupBar.PopupBarElement() { // button
 						@Override
-						public boolean onClick(int button) {
+						public boolean onClick() {
 							long diff = DateUtils.trimToDay(block.getStart()) - DateUtils.trimToDay(Core.getMainActivity().getCurrentTimeLine().getTime());
 							Core.getMainActivity().getViewPager().setCurrentItem(Core.getMainActivity().getViewPager().getCurrentItem() + (int) (diff / TimeConstants.DAY));
 							block.add();
@@ -492,10 +509,10 @@ public class TimeBlockView {
 	}
 
 	private class AlphaAnimation implements Runnable {
-		public final boolean toFullyVisible;
-		public final Runnable onStop;
+		private final boolean toFullyVisible;
+		private final Runnable onStop;
 
-		public AlphaAnimation(boolean toFullyVisible, Runnable onStop) {
+		private AlphaAnimation(boolean toFullyVisible, Runnable onStop) {
 			this.toFullyVisible = toFullyVisible;
 			this.onStop = onStop;
 		}
