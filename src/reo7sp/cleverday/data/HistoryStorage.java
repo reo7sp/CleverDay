@@ -118,7 +118,7 @@ public class HistoryStorage extends LocalDataStorage implements DBConstants {
 		}
 
 		for (TimeBlock block : Core.getDataCenter().getTimeBlocks()) {
-			if (block.getTitle() != null && block.getTitle().equalsIgnoreCase(title)) {
+			if (title.equalsIgnoreCase(block.getTitle())) {
 				return block;
 			}
 		}
