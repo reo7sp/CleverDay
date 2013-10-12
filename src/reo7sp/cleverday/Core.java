@@ -19,7 +19,7 @@ import reo7sp.cleverday.ui.timeline.TimeLinesLeader;
 import reo7sp.cleverday.utils.DateUtils;
 
 public class Core {
-	public static final String VERSION = "0.3.1+";
+	public static final String VERSION = "0.4";
 	private static final Random random = new Random();
 	private static final ActionQueue syncActionQueue = new SyncActionQueue();
 	private static final ActionQueue asyncActionQueue = new AsyncActionQueue();
