@@ -1,11 +1,11 @@
 package reo7sp.cleverday.ui;
 
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 
+import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
 
 /**
@@ -21,7 +21,7 @@ public class SteppedTimePicker extends FrameLayout {
 	public SteppedTimePicker(Context context, int step) {
 		super(context);
 		this.step = step;
-		h12 = !DateFormat.is24HourFormat(context);
+		h12 = !Core.getDateFormatter().is24HourFormat();
 		View layout = inflate(context, h12 ? R.layout.stepped_time_picker_12 : R.layout.stepped_time_picker, null);
 		addView(layout);
 		hourPicker = (NumberPicker) layout.findViewById(R.id.hour_picker);

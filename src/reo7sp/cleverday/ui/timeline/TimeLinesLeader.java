@@ -157,7 +157,7 @@ public class TimeLinesLeader implements DataInvalidateListener {
 	/**
 	 * @return the scroll y
 	 */
-	int getScrollY() {
+	public int getScrollY() {
 		return scrollY;
 	}
 
@@ -166,7 +166,7 @@ public class TimeLinesLeader implements DataInvalidateListener {
 	 *
 	 * @param scrollY scroll y to set
 	 */
-	void setScrollY(int scrollY) {
+	public void setScrollY(int scrollY) {
 		this.scrollY = scrollY;
 		if (this.scrollY < 0) {
 			this.scrollY = 0;

@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.text.format.DateFormat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -183,7 +182,7 @@ public class TimeLineView extends View {
 			// time
 			Core.getPaint().setColor(i == curHour ? (darkTheme ? Color.WHITE : Color.BLACK) : (i > 23 ? (darkTheme ? Color.DKGRAY : Color.LTGRAY) : Color.GRAY));
 			Core.getPaint().setFakeBoldText(i == curHour);
-			if (DateFormat.is24HourFormat(Core.getContext())) {
+			if (Core.getDateFormatter().is24HourFormat()) {
 				int h = i % 24;
 				canvas.drawText((h < 10 ? "0" : "") + h, 10, y + 30, Core.getPaint());
 			} else {
@@ -274,7 +273,7 @@ public class TimeLineView extends View {
 				}
 
 				view1.update(false);
-				//moveIntersectedWith(view1);
+				moveIntersectedWith(view1);
 			}
 		}
 	}

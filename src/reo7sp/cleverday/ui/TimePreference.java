@@ -3,11 +3,11 @@ package reo7sp.cleverday.ui;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
-import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TimePicker;
 
+import reo7sp.cleverday.Core;
 import reo7sp.cleverday.R;
 
 public class TimePreference extends DialogPreference {
@@ -37,7 +37,7 @@ public class TimePreference extends DialogPreference {
 	@Override
 	protected View onCreateDialogView() {
 		picker = new TimePicker(getContext());
-		picker.setIs24HourView(DateFormat.is24HourFormat(getContext()));
+		picker.setIs24HourView(Core.getDateFormatter().is24HourFormat());
 
 		return picker;
 	}

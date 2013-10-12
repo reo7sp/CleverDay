@@ -15,6 +15,8 @@ public class DateFormatter {
 	private static final DateFormatter INSTANCE = new DateFormatter();
 	private final Map<String, DateFormat> cache = new HashMap<String, DateFormat>();
 	private final Collection<CachedResult> resultCache = new HashSet<CachedResult>();
+	private boolean is24h;
+	private boolean h24Requested;
 
 	private DateFormatter() {
 	}
@@ -66,6 +68,14 @@ public class DateFormatter {
 		return null;
 	}
 
+	public boolean is24HourFormat() {
+		if (!h24Requested) {
+			is24h = android.text.format.DateFormat.is24HourFormat(Core.getContext());
+			h24Requested = true;
+		}
+		return is24h;
+	}
+
 	public static enum Format {
 		/**
 		 * Time format HH:mm (10:30)
@@ -101,7 +111,7 @@ public class DateFormatter {
 		public String getFormat() {
 			switch (this) {
 				case HOUR_MINUTE:
-					return android.text.format.DateFormat.is24HourFormat(Core.getContext()) ? "HH:mm" : "hh:mm a";
+					return Core.getDateFormatter().is24HourFormat() ? "HH:mm" : "hh:mm a";
 
 				default:
 					return format;

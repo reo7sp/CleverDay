@@ -31,13 +31,12 @@ import reo7sp.cleverday.utils.StringUtils;
 
 public class MainActivity extends FragmentActivity {
 	public static final int TIMELINES_COUNT = 5;
-	private static boolean firstCreation = true;
-	private static int viewPagerPos = TIMELINES_COUNT / 2;
+	private int viewPagerPos = TIMELINES_COUNT / 2;
 	private ViewPager viewPager;
 	private TimeLineView currentTimeLine;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		// building core
 		Core.startBuilding()
 				.setMainActivity(this)
@@ -46,6 +45,9 @@ public class MainActivity extends FragmentActivity {
 		// other...
 		AndroidUtils.updateTheme(this);
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			viewPagerPos = savedInstanceState.getInt("viewPagerPos", TIMELINES_COUNT / 2);
+		}
 		getActionBar().setLogo(android.R.color.transparent);
 
 		// welcome
@@ -80,9 +82,16 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void run() {
 				viewPager.setCurrentItem(viewPagerPos, false);
-				if (firstCreation) {
+
+				if (savedInstanceState == null) {
 					Core.getTimeLinesLeader().init();
-					firstCreation = false;
+				} else {
+					int scrollY = savedInstanceState.getInt("scrollY", -1);
+					if (scrollY == -1) {
+						Core.getTimeLinesLeader().init();
+					} else {
+						Core.getTimeLinesLeader().setScrollY(scrollY);
+					}
 				}
 			}
 		});
@@ -152,12 +161,28 @@ public class MainActivity extends FragmentActivity {
 		return true;
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt("scrollY", Core.getTimeLinesLeader().getScrollY());
+		outState.putInt("viewPagerPos", viewPagerPos);
+	}
+
 	public ViewPager getViewPager() {
 		return viewPager;
 	}
 
 	public TimeLineView getCurrentTimeLine() {
 		return currentTimeLine;
+	}
+
+	public static class TimeLineFragment extends Fragment {
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			TimeLineView timeLine = new TimeLineView(getActivity(), getArguments().getLong("time"));
+			timeLine.setTag("tl_" + getArguments().getInt("pos"));
+			return timeLine;
+		}
 	}
 
 	private class TimeLinePagerAdapter extends FragmentStatePagerAdapter {
@@ -196,15 +221,6 @@ public class MainActivity extends FragmentActivity {
 				default:
 					return Core.getDateFormatter().format(DateFormatter.Format.WEEKDAY_DAY_MONTH, time);
 			}
-		}
-	}
-
-	private class TimeLineFragment extends Fragment {
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			TimeLineView timeLine = new TimeLineView(getActivity(), getArguments().getLong("time"));
-			timeLine.setTag("tl_" + getArguments().getInt("pos"));
-			return timeLine;
 		}
 	}
 }

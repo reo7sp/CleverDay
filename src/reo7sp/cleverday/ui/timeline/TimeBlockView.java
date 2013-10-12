@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.text.format.DateFormat;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -70,7 +69,7 @@ public class TimeBlockView {
 		canvas.drawRect(50, y, timeLine.getWidth() - 8, y + height, Core.getPaint());
 
 		// text
-		int offset = DateFormat.is24HourFormat(Core.getContext()) ? 0 : 40;
+		int offset = Core.getDateFormatter().is24HourFormat() ? 0 : 40;
 		Core.getPaint().setColor(ColorUtils.changeAlpha(Color.WHITE, alpha));
 		canvas.drawText(Core.getDateFormatter().format(DateFormatter.Format.HOUR_MINUTE, block.getStart()), 60, y + 30, Core.getPaint());
 		canvas.drawText(block.getHumanTitle(), offset + 130, y + 30, Core.getPaint());
