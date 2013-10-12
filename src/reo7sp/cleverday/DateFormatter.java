@@ -90,7 +90,8 @@ public class DateFormatter {
 		/**
 		 * Date format dd MMM HH:mm:ss.SSS (14 Jan 10:30:11.358)
 		 */
-		DAY_MONTH_HOUR_MINUTE_SECOND_MILLISECOND("dd MMM HH:mm:ss.SSS"),;
+		DAY_MONTH_HOUR_MINUTE_SECOND_MILLISECOND("dd MMM HH:mm:ss.SSS");
+		//
 		private final String format;
 
 		private Format(String format) {
@@ -98,7 +99,13 @@ public class DateFormatter {
 		}
 
 		public String getFormat() {
-			return format;
+			switch (this) {
+				case HOUR_MINUTE:
+					return android.text.format.DateFormat.is24HourFormat(Core.getContext()) ? "HH:mm" : "hh:mm a";
+
+				default:
+					return format;
+			}
 		}
 	}
 

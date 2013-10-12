@@ -57,7 +57,7 @@
 			android:layout_alignLeft="@+id/end_time_button"
 			android:paddingLeft="10dp"
 			android:textSize="18sp"
-			android:width="96dp" />
+			android:width="112dp" />
 
 	<Button
 			android:id="@+id/end_time_button"
@@ -68,7 +68,7 @@
 			android:layout_below="@+id/end_time_label"
 			android:paddingLeft="10dp"
 			android:textSize="18sp"
-			android:width="96dp" />
+			android:width="112dp" />
 
 	<Button
 			android:id="@+id/end_date_button"

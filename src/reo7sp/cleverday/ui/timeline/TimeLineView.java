@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.format.DateFormat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -176,13 +177,28 @@ public class TimeLineView extends View {
 		// drawing graph
 		canvas.drawPaint(Core.getPaint());
 		int curHour = DateUtils.isInOneDay(Core.getCreationTime(), time) ? DateUtils.getFromTime(System.currentTimeMillis(), Calendar.HOUR_OF_DAY) : -1;
-		for (int i = 0; i < 27; i++) {
+		for (int i = 0; i < 25; i++) {
 			int y = STEP * i + 8;
 
 			// time
 			Core.getPaint().setColor(i == curHour ? (darkTheme ? Color.WHITE : Color.BLACK) : (i > 23 ? (darkTheme ? Color.DKGRAY : Color.LTGRAY) : Color.GRAY));
 			Core.getPaint().setFakeBoldText(i == curHour);
-			canvas.drawText(((i % 24) < 10 ? "0" : "") + (i % 24), 10, y + 30, Core.getPaint());
+			if (DateFormat.is24HourFormat(Core.getContext())) {
+				int h = i % 24;
+				canvas.drawText((h < 10 ? "0" : "") + h, 10, y + 30, Core.getPaint());
+			} else {
+				boolean pm = i > 11;
+				int h = i - (pm ? 12 : 0);
+				if (h == 0) {
+					h = 12;
+				} else if (i == 25) {
+					h = 12;
+					pm = false;
+				}
+
+				canvas.drawText((h < 10 ? "0" : "") + h, 10, y + 30, Core.getPaint());
+				canvas.drawText(pm ? "PM" : "AM", 5, y + 60, Core.getPaint());
+			}
 			Core.getPaint().setFakeBoldText(false);
 
 			// line
