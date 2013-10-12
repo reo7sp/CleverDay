@@ -355,6 +355,17 @@ public class TimeBlockView {
 		timeLine.postInvalidate();
 	}
 
+
+	/**
+	 * Checks if specified time block view intersects with this time block view
+	 *
+	 * @param view time block view to check
+	 * @return true if specified time block view intersects with this time block view
+	 */
+	boolean intersects(TimeBlockView view) {
+		return view.getBlock().intersects(block);
+	}
+
 	/**
 	 * @return the drag start location
 	 */

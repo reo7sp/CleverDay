@@ -264,6 +264,21 @@ public class TimeLineView extends View {
 		}
 	}
 
+	private void moveIntersectedWith(TimeBlockView view) {
+		for (TimeBlockView view1 : timeBlockViews) {
+			if (view1 != view && view1.intersects(view)) {
+				if (view1.getY() < view.getY()) {
+					view1.getBlock().move(view.getBlock().getStart() - view1.getBlock().getEnd());
+				} else {
+					view1.getBlock().move(view.getBlock().getEnd() - view1.getBlock().getStart());
+				}
+
+				view1.update(false);
+				//moveIntersectedWith(view1);
+			}
+		}
+	}
+
 	/**
 	 * @return the collection of time block views
 	 */
@@ -398,6 +413,7 @@ public class TimeLineView extends View {
 					}
 
 					editingBlock.update(false);
+					moveIntersectedWith(editingBlock);
 				}
 			}
 		}

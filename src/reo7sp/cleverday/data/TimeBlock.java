@@ -376,6 +376,17 @@ public class TimeBlock implements TimeConstants {
 	}
 
 	/**
+	 * Checks if specified time block intersects with this time block
+	 *
+	 * @param block time block to check
+	 * @return true if specified time block intersects with this time block
+	 */
+	public boolean intersects(TimeBlock block) {
+		return (block.getUtcStart() < getUtcEnd() && block.getUtcEnd() > getUtcStart()) ||
+				(block.getUtcStart() > getUtcEnd() && block.getUtcEnd() < getUtcStart());
+	}
+
+	/**
 	 * Creates copy of this time block
 	 *
 	 * @return copy of this time block
